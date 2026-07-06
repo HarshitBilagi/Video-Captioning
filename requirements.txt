@@ -1,0 +1,8 @@
+opencv-python
+openai-whisper
+fireworks-ai
+streamlit
+python-dotenv
+moviepy
+pyyaml
+requests

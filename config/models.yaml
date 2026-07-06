@@ -1,0 +1,3 @@
+vision_model: "placeholder"
+text_model: "placeholder"
+transcription_model: "whisper-v3"
