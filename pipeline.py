@@ -12,6 +12,7 @@ try:
     from src.scene_understanding import describe_scene
     from src.caption_generation import generate_all_captions
     from src.self_judge import judge_all_captions
+    from src.model_client import ModelClient
 except ImportError:
     import sys
     sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "src"))
@@ -19,12 +20,16 @@ except ImportError:
     from scene_understanding import describe_scene
     from caption_generation import generate_all_captions
     from self_judge import judge_all_captions
+    from model_client import ModelClient
 
 def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "results.json") -> None:
     """
     Orchestrates the video captioning pipeline across all video clips in the clips directory.
     Saves the final output JSON and prints a complete summary at the end.
     """
+    # Reset usage counters for this run
+    ModelClient.reset_usage()
+
     # Verify/create directory structures
     os.makedirs(clips_dir, exist_ok=True)
 
@@ -143,6 +148,9 @@ def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "result
             print(f"    - Accuracy: {avg_acc:.2f}/5.00")
             print(f"    - Tone Fit: {avg_fit:.2f}/5.00")
     print("==========================================")
+
+    # Print API usage summary
+    ModelClient.print_usage_summary()
 
 if __name__ == "__main__":
     run_batch_pipeline()

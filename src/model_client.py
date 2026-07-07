@@ -27,6 +27,13 @@ class ModelClient:
     Client wrapper for interacting with Fireworks API models, configured via models.yaml.
     Supports a mock mode for local testing without valid credentials or configurations.
     """
+    # Class-level usage counters shared across all instances
+    _total_calls = 0
+    _total_prompt_tokens = 0
+    _total_completion_tokens = 0
+    _total_tokens = 0
+    _MAX_CALLS_PER_RUN = int(os.getenv("MAX_CALLS_PER_RUN", "100"))
+
     def __init__(self, config_path: str = "config/models.yaml", force_mock_mode: bool = False):
         """
         Initializes the ModelClient by loading the model configuration file.
@@ -65,6 +72,68 @@ class ModelClient:
                 or self.text_model.lower() == "placeholder"):
                 self.mock_mode = True
                 print("[INFO] Running in MOCK MODE - no real API calls will be made.")
+
+    def _check_call_limit(self, method_name: str) -> None:
+        """
+        Checks whether the class-level call count has exceeded MAX_CALLS_PER_RUN.
+        Raises RuntimeError if the limit is exceeded to prevent runaway API spending.
+        """
+        if ModelClient._total_calls >= ModelClient._MAX_CALLS_PER_RUN:
+            raise RuntimeError(
+                f"Safety limit exceeded: {ModelClient._total_calls} API calls made "
+                f"(limit: {ModelClient._MAX_CALLS_PER_RUN}). Halting to prevent "
+                f"runaway credit usage. Increase MAX_CALLS_PER_RUN env var if intentional. "
+                f"Triggered by: {method_name}"
+            )
+
+    def _track_usage(self, response_json: Dict[str, Any], method_name: str) -> None:
+        """
+        Extracts token usage stats from the API response and updates class-level counters.
+        Logs the per-call usage at INFO level.
+        """
+        ModelClient._total_calls += 1
+        usage = response_json.get("usage", {})
+        prompt_tokens = usage.get("prompt_tokens", 0)
+        completion_tokens = usage.get("completion_tokens", 0)
+        total_tokens = usage.get("total_tokens", prompt_tokens + completion_tokens)
+
+        ModelClient._total_prompt_tokens += prompt_tokens
+        ModelClient._total_completion_tokens += completion_tokens
+        ModelClient._total_tokens += total_tokens
+
+        logging.info(
+            f"[Usage] {method_name}: prompt={prompt_tokens}, "
+            f"completion={completion_tokens}, total={total_tokens} tokens | "
+            f"Running totals: calls={ModelClient._total_calls}, "
+            f"tokens={ModelClient._total_tokens}"
+        )
+
+    @classmethod
+    def print_usage_summary(cls) -> None:
+        """
+        Prints a formatted summary of all API usage accumulated across all ModelClient instances.
+        """
+        print("\n------------------------------------------")
+        print("         FIREWORKS API USAGE SUMMARY")
+        print("------------------------------------------")
+        print(f"  Total API Calls:        {cls._total_calls}")
+        print(f"  Total Prompt Tokens:    {cls._total_prompt_tokens}")
+        print(f"  Total Completion Tokens: {cls._total_completion_tokens}")
+        print(f"  Total Tokens:           {cls._total_tokens}")
+        print(f"  Max Calls Limit:        {cls._MAX_CALLS_PER_RUN}")
+        if cls._total_calls == 0:
+            print("  (No real API calls were made - mock mode was active)")
+        print("------------------------------------------")
+
+    @classmethod
+    def reset_usage(cls) -> None:
+        """
+        Resets all class-level usage counters. Useful for testing.
+        """
+        cls._total_calls = 0
+        cls._total_prompt_tokens = 0
+        cls._total_completion_tokens = 0
+        cls._total_tokens = 0
 
     def _load_config(self) -> Dict[str, Any]:
         """
@@ -189,12 +258,17 @@ class ModelClient:
         if not self.vision_model or self.vision_model.lower() == "placeholder":
             raise ValueError("vision_model in config/models.yaml is still set to 'placeholder'. Please configure a valid vision model name.")
             
-        # Encode frames to base64 blocks
-        image_blocks = []
+        # Encode frames to base64 and build content blocks for the user message
+        user_content_blocks = []
+        total_b64_bytes = 0
+        encoded_count = 0
+        
         for path in frames:
             try:
                 b64_str = self._encode_image_to_base64(path)
-                image_blocks.append({
+                total_b64_bytes += len(b64_str)
+                encoded_count += 1
+                user_content_blocks.append({
                     "type": "image_url",
                     "image_url": {
                         "url": f"data:image/jpeg;base64,{b64_str}"
@@ -203,8 +277,15 @@ class ModelClient:
             except Exception as e:
                 logging.error(f"Error encoding frame {path} to base64: {e}")
                 
-        if not image_blocks:
+        if not user_content_blocks:
             raise ValueError("No valid frames could be encoded for vision model analysis.")
+        
+        # Log payload size for cost awareness
+        payload_size_mb = total_b64_bytes / (1024 * 1024)
+        logging.info(
+            f"[describe_scene] Sending {encoded_count} frame(s), "
+            f"total base64 payload size: {total_b64_bytes:,} bytes ({payload_size_mb:.2f} MB)"
+        )
             
         system_prompt = (
             "You are an AI video analysis assistant. You are given a sequence of keyframes from a video clip "
@@ -220,21 +301,33 @@ class ModelClient:
             "}"
         )
         
-        user_prompt = f"Audio transcript: '{transcript}'\nAnalyze the attached frames and describe the scene using the JSON format."
+        user_text = f"Audio transcript: '{transcript}'\nAnalyze the attached frames and describe the scene using the JSON format."
+        
+        # Append the text instruction block after the image blocks
+        user_content_blocks.append({
+            "type": "text",
+            "text": user_text
+        })
         
         payload = {
             "model": self.vision_model,
+            "max_tokens": 1000,
             "messages": [
-                {"role": "system", "content": system_prompt},
+                {
+                    "role": "system",
+                    "content": [{"type": "text", "text": system_prompt}]
+                },
                 {
                     "role": "user",
-                    "content": [{"type": "text", "text": user_prompt}] + image_blocks
+                    "content": user_content_blocks
                 }
             ],
             "temperature": 0.0
         }
         
+        self._check_call_limit("describe_scene")
         response_json = self._post_with_retry(self.api_url, payload)
+        self._track_usage(response_json, "describe_scene")
         content = response_json["choices"][0]["message"]["content"]
         
         try:
@@ -242,11 +335,17 @@ class ModelClient:
         except ValueError as e:
             logging.warning(f"Initial JSON parsing failed: {e}. Retrying once with stricter instructions...")
             
-            # Retry once with a stricter instructions
-            strict_system_prompt = system_prompt + "\nCRITICAL: Respond ONLY with the raw JSON string. Do NOT write ```json or other formatting. Begin with '{' and end with '}'."
-            payload["messages"][0]["content"] = strict_system_prompt
+            # Retry once with stricter instructions
+            strict_system_prompt = (
+                system_prompt + 
+                "\nCRITICAL: Respond ONLY with the raw JSON string. "
+                "Do NOT write ```json or other formatting. Begin with '{' and end with '}'."
+            )
+            payload["messages"][0]["content"] = [{"type": "text", "text": strict_system_prompt}]
             
+            self._check_call_limit("describe_scene_retry")
             retry_response_json = self._post_with_retry(self.api_url, payload)
+            self._track_usage(retry_response_json, "describe_scene_retry")
             retry_content = retry_response_json["choices"][0]["message"]["content"]
             
             return self._parse_and_validate_json(retry_content)
@@ -287,7 +386,9 @@ class ModelClient:
             "temperature": 0.7
         }
 
+        self._check_call_limit("generate_caption")
         response_json = self._post_with_retry(self.api_url, payload)
+        self._track_usage(response_json, "generate_caption")
         content = response_json["choices"][0]["message"]["content"]
 
         clean_caption = content.strip().strip(" \t\n\r\"'")
@@ -328,7 +429,9 @@ class ModelClient:
             "temperature": 0.0
         }
 
+        self._check_call_limit("judge_caption")
         response_json = self._post_with_retry(self.api_url, payload)
+        self._track_usage(response_json, "judge_caption")
         content = response_json["choices"][0]["message"]["content"].strip()
 
         try:
@@ -342,14 +445,17 @@ class ModelClient:
 
 if __name__ == "__main__":
     print("=== Testing ModelClient in MOCK MODE ===")
+    ModelClient.reset_usage()
     mock_client = ModelClient(force_mock_mode=True)
     print(f"Mock Mode Status: {mock_client.mock_mode}")
+    print(f"MAX_CALLS_PER_RUN: {ModelClient._MAX_CALLS_PER_RUN}")
     scene = mock_client.describe_scene(["dummy_path.jpg"], "Dummy transcript text")
     print("Mock describe_scene output:", json.dumps(scene, indent=4))
     caption = mock_client.generate_caption(scene, "sarcastic")
     print("Mock generate_caption output:", caption)
     judgment = mock_client.judge_caption(caption, scene, "sarcastic")
     print("Mock judge_caption output:", json.dumps(judgment, indent=4))
+    ModelClient.print_usage_summary()
     
     print("\n=== Testing ModelClient in REAL MODE (will show error/warn as configured) ===")
     try:
