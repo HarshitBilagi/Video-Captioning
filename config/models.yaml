@@ -1,3 +1,3 @@
-vision_model: "accounts/fireworks/models/gemma-4-e4b"
-text_model: "accounts/fireworks/models/gemma-4-e4b"
+vision_model: "accounts/fireworks/models/minimax-m3"
+text_model: "accounts/fireworks/models/minimax-m3"
 transcription_model: "whisper-v3"
