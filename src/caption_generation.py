@@ -18,10 +18,10 @@ except ImportError:
 
 VALID_TONES = ["formal", "sarcastic", "humorous_tech", "humorous_non_tech"]
 
-def clean_and_truncate_caption(caption: str, max_len: int = 280) -> str:
+def clean_caption(caption: str) -> str:
     """
-    Cleans the caption by stripping surrounding quotes, collapsing extra whitespace,
-    and truncating at a word boundary if it exceeds max_len.
+    Cleans the caption by stripping surrounding quotes and collapsing extra whitespace.
+    Length control is handled upstream via prompt instructions and max_tokens.
     """
     # 1. Strip surrounding quotes and whitespace
     cleaned = caption.strip().strip(" \t\n\r\"'")
@@ -29,23 +29,6 @@ def clean_and_truncate_caption(caption: str, max_len: int = 280) -> str:
     # 2. Collapse extra whitespace
     cleaned = re.sub(r'\s+', ' ', cleaned)
     
-    # 3. Enforce max length by truncating at a word boundary
-    if len(cleaned) > max_len:
-        limit = max_len - 3  # Leave room for ellipsis "..."
-        truncated = cleaned[:limit]
-        
-        # Find the last space to avoid cutting a word in half
-        last_space = truncated.rfind(' ')
-        if last_space != -1:
-            truncated = truncated[:last_space]
-            
-        cleaned_truncated = truncated.rstrip(".,?!:;-") + "..."
-        logging.warning(
-            f"Caption length of {len(cleaned)} chars exceeded max_len ({max_len}). "
-            f"Truncated to: '{cleaned_truncated}'"
-        )
-        return cleaned_truncated
-        
     return cleaned
 
 def generate_caption(scene_json: Dict[str, Any], tone: str) -> str:
@@ -70,8 +53,8 @@ def generate_caption(scene_json: Dict[str, Any], tone: str) -> str:
     client = ModelClient()
     raw_caption = client.generate_caption(scene_json, tone)
     
-    # 3. Apply post-processing
-    return clean_and_truncate_caption(raw_caption)
+    # 3. Apply post-processing (quote/whitespace cleanup only, no truncation)
+    return clean_caption(raw_caption)
 
 def generate_all_captions(scene_json: Dict[str, Any]) -> Dict[str, str]:
     """

@@ -14,12 +14,36 @@ load_dotenv()
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# Default placeholders for tone prompts
+# Tone-specific system prompts for caption generation
 TONE_PROMPTS = {
-    "formal": "PLACEHOLDER_FORMAL_PROMPT",
-    "sarcastic": "PLACEHOLDER_SARCASTIC_PROMPT",
-    "humorous_tech": "PLACEHOLDER_HUMOROUS_TECH_PROMPT",
-    "humorous_non_tech": "PLACEHOLDER_HUMOROUS_NON_TECH_PROMPT"
+    "formal": (
+        "You are a professional documentary narrator. Write one factual, objective, "
+        "third-person caption describing only what is literally visible in the scene. "
+        "Use precise language. No emojis. No hashtags. No exclamation marks. No opinions. "
+        "No calls to action. Maximum 2 sentences. Complete sentences only. "
+        "Do not cut off mid-sentence."
+    ),
+    "sarcastic": (
+        "You are a deadpan sarcastic commentator. Write one dry, understated caption "
+        "that subtly mocks the scene by treating the mundane as profound or the obvious as "
+        "remarkable. No emojis. No hashtags. No exclamation marks. Do not be enthusiastic. "
+        "Do not use the word 'just'. Maximum 2 sentences. Complete sentences only. "
+        "Do not cut off mid-sentence."
+    ),
+    "humorous_tech": (
+        "You are a software engineer describing real life using only programming and "
+        "tech metaphors. Write one caption where the humor comes entirely from mapping the "
+        "scene to technical concepts (functions, bugs, servers, APIs, git, etc). "
+        "No emojis. No hashtags. No exclamation marks. Maximum 2 sentences. Complete sentences only. "
+        "Do not cut off mid-sentence."
+    ),
+    "humorous_non_tech": (
+        "You are a witty everyday observer. Write one funny, relatable caption using "
+        "only plain conversational language. No tech jargon. No emojis. No hashtags. "
+        "Observational humor only — the joke must come from the situation itself. "
+        "Maximum 2 sentences. Complete sentences only. "
+        "Do not cut off mid-sentence."
+    )
 }
 
 class ModelClient:
@@ -311,7 +335,7 @@ class ModelClient:
         
         payload = {
             "model": self.vision_model,
-            "max_tokens": 600,
+            "max_tokens": 1200,
             "messages": [
                 {
                     "role": "system",
@@ -330,10 +354,14 @@ class ModelClient:
         self._track_usage(response_json, "describe_scene")
         message = response_json["choices"][0]["message"]
         content = message.get("content")
+        
+        # If content is empty (model returned only reasoning_content), fall through to retry
         if not content:
-            raise ValueError("Content is None or empty in model response")
+            logging.warning("describe_scene: content was None or empty on first attempt, will retry...")
         
         try:
+            if not content:
+                raise ValueError("Content is None or empty in model response")
             return self._parse_and_validate_json(content)
         except ValueError as e:
             logging.warning(f"Initial JSON parsing failed: {e}. Retrying once with stricter instructions...")
@@ -381,11 +409,14 @@ class ModelClient:
         if not sys_prompt:
             sys_prompt = TONE_PROMPTS.get(tone.lower(), f"PLACEHOLDER_{tone.upper()}_PROMPT")
 
-        user_content = f"Scene context: {json.dumps(scene_json)}\nGenerate a caption with the specified tone."
+        user_content = (
+            f"Scene details:\n{json.dumps(scene_json, indent=2)}\n\n"
+            "Write the caption now. One caption only. No preamble. No markdown bold. No quotes around it."
+        )
 
         payload = {
             "model": self.text_model,
-            "max_tokens": 400,
+            "max_tokens": 800,
             "messages": [
                 {"role": "system", "content": sys_prompt},
                 {"role": "user", "content": user_content}
@@ -398,8 +429,17 @@ class ModelClient:
         self._track_usage(response_json, "generate_caption")
         message = response_json["choices"][0]["message"]
         content = message.get("content")
+        
+        # Retry once if content is None/empty (model sometimes returns only reasoning_content)
         if not content:
-            raise ValueError("Content is None or empty in model response")
+            logging.warning("generate_caption: content was None or empty, retrying once...")
+            self._check_call_limit("generate_caption_retry")
+            response_json = self._post_with_retry(self.api_url, payload)
+            self._track_usage(response_json, "generate_caption_retry")
+            message = response_json["choices"][0]["message"]
+            content = message.get("content")
+            if not content:
+                raise ValueError("Content is None or empty in model response after retry")
 
         clean_caption = content.strip().strip(" \t\n\r\"'")
         return clean_caption
@@ -432,7 +472,7 @@ class ModelClient:
 
         payload = {
             "model": self.text_model,
-            "max_tokens": 400,
+            "max_tokens": 600,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content}
@@ -445,8 +485,17 @@ class ModelClient:
         self._track_usage(response_json, "judge_caption")
         message = response_json["choices"][0]["message"]
         content = message.get("content")
+        
+        # Retry once if content is None/empty (model sometimes returns only reasoning_content)
         if not content:
-            raise ValueError("Content is None or empty in model response")
+            logging.warning("judge_caption: content was None or empty, retrying once...")
+            self._check_call_limit("judge_caption_retry")
+            response_json = self._post_with_retry(self.api_url, payload)
+            self._track_usage(response_json, "judge_caption_retry")
+            message = response_json["choices"][0]["message"]
+            content = message.get("content")
+            if not content:
+                raise ValueError("Content is None or empty in model response after retry")
         
         content_stripped = content.strip()
 

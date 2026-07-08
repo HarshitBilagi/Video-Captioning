@@ -1,6 +1,51 @@
 [
   {
     "clip_id": "Clip2",
-    "error": "Content is None or empty in model response after retry"
+    "scene_description": {
+      "setting": "An outdoor paved road lined with lush green trees, a stone wall on the left side, and a green structure/building on the right, during daytime with warm natural lighting",
+      "subjects": [
+        "A young man wearing a grey hoodie, white graphic t-shirt, and light blue jeans",
+        "A young woman wearing a dark navy jersey with the number '28' and dark shorts"
+      ],
+      "actions": [
+        "The two subjects stand facing the camera on the road",
+        "They begin performing a coordinated dance routine",
+        "The woman bends forward and moves dynamically",
+        "The man reaches out toward the woman as part of the choreography",
+        "They continue dancing with synchronized movements and poses"
+      ],
+      "notable_details": [
+        "Text overlay reads 'Recreate this whenever you are out next time' with a person emoji",
+        "The woman's jersey prominently displays the number '28'",
+        "The video has a black background framing the footage",
+        "The road appears to be in a quiet, tree-lined residential or park area",
+        "The footage is presented in a vertical/portrait format with black bars"
+      ],
+      "audio_context": "No speech detected; the audio likely contains background music that accompanies the dance performance, as the visual content shows a choreographed routine meant to be recreated by viewers"
+    },
+    "captions": {
+      "formal": "Two young people perform a coordinated dance routine on a tree-lined paved road, with the man wearing a grey hoodie and light jeans and the woman wearing a navy jersey displaying the number 28. Text reading \"Recreate this whenever you are out next time\" alongside a person emoji is overlaid on the vertical footage.",
+      "sarcastic": "Two strangers on a quiet road perform choreography that will surely revolutionize how everyone walks to the mailbox from now on. The number 28 jersey suggests a level of athletic legitimacy that the synchronized bending absolutely does not undermine.",
+      "humorous_tech": "Two threads spin up a synchronized choreography routine on the paved main path, with one process invoking a callback on the other while the jersey logs build number 28. The overlay ships a fork request asking viewers to clone this repo and run it locally whenever they exit the sandbox.",
+      "humorous_non_tech": "Nothing says \"casual stroll in the neighborhood\" like stopping mid-walk to nail a choreographed dance routine you saw on your phone thirty seconds ago."
+    },
+    "self_judge_scores": {
+      "formal": {
+        "accuracy": 4,
+        "tone_fit": 4
+      },
+      "sarcastic": {
+        "accuracy": 3,
+        "tone_fit": 4
+      },
+      "humorous_tech": {
+        "accuracy": 4,
+        "tone_fit": 5
+      },
+      "humorous_non_tech": {
+        "accuracy": 3,
+        "tone_fit": 4
+      }
+    }
   }
 ]
