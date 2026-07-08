@@ -311,7 +311,7 @@ class ModelClient:
         
         payload = {
             "model": self.vision_model,
-            "max_tokens": 1000,
+            "max_tokens": 600,
             "messages": [
                 {
                     "role": "system",
@@ -328,7 +328,10 @@ class ModelClient:
         self._check_call_limit("describe_scene")
         response_json = self._post_with_retry(self.api_url, payload)
         self._track_usage(response_json, "describe_scene")
-        content = response_json["choices"][0]["message"]["content"]
+        message = response_json["choices"][0]["message"]
+        content = message.get("content")
+        if not content:
+            raise ValueError("Content is None or empty in model response")
         
         try:
             return self._parse_and_validate_json(content)
@@ -346,7 +349,10 @@ class ModelClient:
             self._check_call_limit("describe_scene_retry")
             retry_response_json = self._post_with_retry(self.api_url, payload)
             self._track_usage(retry_response_json, "describe_scene_retry")
-            retry_content = retry_response_json["choices"][0]["message"]["content"]
+            retry_message = retry_response_json["choices"][0]["message"]
+            retry_content = retry_message.get("content")
+            if not retry_content:
+                raise ValueError("Content is None or empty in retry model response")
             
             return self._parse_and_validate_json(retry_content)
 
@@ -379,6 +385,7 @@ class ModelClient:
 
         payload = {
             "model": self.text_model,
+            "max_tokens": 400,
             "messages": [
                 {"role": "system", "content": sys_prompt},
                 {"role": "user", "content": user_content}
@@ -389,7 +396,10 @@ class ModelClient:
         self._check_call_limit("generate_caption")
         response_json = self._post_with_retry(self.api_url, payload)
         self._track_usage(response_json, "generate_caption")
-        content = response_json["choices"][0]["message"]["content"]
+        message = response_json["choices"][0]["message"]
+        content = message.get("content")
+        if not content:
+            raise ValueError("Content is None or empty in model response")
 
         clean_caption = content.strip().strip(" \t\n\r\"'")
         return clean_caption
@@ -422,6 +432,7 @@ class ModelClient:
 
         payload = {
             "model": self.text_model,
+            "max_tokens": 400,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_content}
@@ -432,16 +443,21 @@ class ModelClient:
         self._check_call_limit("judge_caption")
         response_json = self._post_with_retry(self.api_url, payload)
         self._track_usage(response_json, "judge_caption")
-        content = response_json["choices"][0]["message"]["content"].strip()
+        message = response_json["choices"][0]["message"]
+        content = message.get("content")
+        if not content:
+            raise ValueError("Content is None or empty in model response")
+        
+        content_stripped = content.strip()
 
         try:
-            return json.loads(content)
+            return json.loads(content_stripped)
         except json.JSONDecodeError:
-            start_idx = content.find('{')
-            end_idx = content.rfind('}')
+            start_idx = content_stripped.find('{')
+            end_idx = content_stripped.rfind('}')
             if start_idx != -1 and end_idx != -1:
-                return json.loads(content[start_idx:end_idx+1])
-            raise ValueError(f"Could not parse judge JSON from response content: {content}")
+                return json.loads(content_stripped[start_idx:end_idx+1])
+            raise ValueError(f"Could not parse judge JSON from response content: {content_stripped}")
 
 if __name__ == "__main__":
     print("=== Testing ModelClient in MOCK MODE ===")

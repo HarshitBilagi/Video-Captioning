@@ -1,4 +1,3 @@
-# test_fireworks_vision.py
 import os
 import base64
 import requests

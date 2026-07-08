@@ -1,6 +1,6 @@
 [
   {
     "clip_id": "Clip2",
-    "error": "404 Client Error: Not Found for url: https://api.fireworks.ai/inference/v1/chat/completions"
+    "error": "Content is None or empty in model response after retry"
   }
 ]
