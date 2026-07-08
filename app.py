@@ -357,7 +357,7 @@ with tab_url:
                     dest_path = os.path.join("data", "clips", selected_clip)
                     
                     # Centered video preview
-                    v_col1, v_col2, v_col3 = st.columns([1, 0.5, 1])
+                    v_col1, v_col2, v_col3 = st.columns([1, 1, 1])
                     with v_col2:
                         st.video(dest_path)
                         
