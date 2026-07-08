@@ -1,6 +1,7 @@
 import os
 import json
 import glob
+import time
 import logging
 from typing import Dict, Any, List
 
@@ -118,6 +119,11 @@ def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "result
             }
             results.append(clip_result)
             failure_count += 1
+
+        # Pause between clips to avoid rate limits on the free tier
+        if idx < total_clips:
+            print("  [WAIT] Pausing 3 seconds before next clip...")
+            time.sleep(3)
 
     # Write per-clip results output
     try:

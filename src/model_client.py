@@ -181,25 +181,27 @@ class ModelClient:
         """
         Makes a POST request to the API with retry logic and exponential backoff.
         """
-        backoff = 1.0
         last_exception = None
         
         for attempt in range(max_retries + 1):
             try:
                 response = self.session.post(url, json=json_data, timeout=30)
                 if response.status_code == 200:
+                    # Small delay between consecutive successful calls to avoid rate limits
+                    time.sleep(0.5)
                     return response.json()
                 elif response.status_code in [408, 429, 500, 502, 503, 504]:
+                    backoff = 2 * (attempt + 1)
                     logging.warning(f"API post failed with retriable status code {response.status_code}. Attempt {attempt + 1}/{max_retries + 1}. Retrying in {backoff}s...")
                 else:
                     response.raise_for_status()
             except (requests.exceptions.RequestException, requests.exceptions.Timeout) as e:
                 last_exception = e
+                backoff = 2 * (attempt + 1)
                 logging.warning(f"API post failed with exception: {e}. Attempt {attempt + 1}/{max_retries + 1}. Retrying in {backoff}s...")
                 
             if attempt < max_retries:
-                time.sleep(backoff)
-                backoff *= 2
+                time.sleep(2 * (attempt + 1))  # exponential: 2s, 4s between retries
             else:
                 if last_exception:
                     raise last_exception

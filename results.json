@@ -1,38 +1,89 @@
 [
   {
-    "clip_id": "Clip2",
+    "clip_id": "Clip1",
     "scene_description": {
-      "setting": "An outdoor paved road lined with lush green trees, a stone wall on the left side, and a green structure/building on the right, during daytime with warm natural lighting",
+      "setting": "A laptop screen displaying Formula 1 post-race celebration footage, filmed in a dimly lit room with a backlit keyboard visible in the foreground",
       "subjects": [
-        "A young man wearing a grey hoodie, white graphic t-shirt, and light blue jeans",
-        "A young woman wearing a dark navy jersey with the number '28' and dark shorts"
+        "A Ferrari Formula 1 driver in a red racing suit and helmet (appears to be Charles Leclerc)",
+        "Ferrari team members in red uniforms",
+        "A woman in dark clothing (possibly a reporter or team member)"
       ],
       "actions": [
-        "The two subjects stand facing the camera on the road",
-        "They begin performing a coordinated dance routine",
-        "The woman bends forward and moves dynamically",
-        "The man reaches out toward the woman as part of the choreography",
-        "They continue dancing with synchronized movements and poses"
+        "The driver runs through the paddock area",
+        "The driver jumps over a barrier to reach celebrating team members",
+        "The driver is embraced and hugged by multiple team members in celebration",
+        "The driver walks through the paddock wearing a yellow checkered cap",
+        "The driver stands with a teammate",
+        "The driver interacts with a woman in what appears to be a post-race interview area"
       ],
       "notable_details": [
-        "Text overlay reads 'Recreate this whenever you are out next time' with a person emoji",
-        "The woman's jersey prominently displays the number '28'",
-        "The video has a black background framing the footage",
-        "The road appears to be in a quiet, tree-lined residential or park area",
-        "The footage is presented in a vertical/portrait format with black bars"
+        "Ferrari logo and branding prominently displayed",
+        "Pirelli sponsor logos visible in the interview area",
+        "The number 16 visible on the driver's helmet",
+        "Laptop keyboard backlighting changes colors throughout (yellow, green, purple, orange, red)",
+        "Crowd of fans and photographers visible in the background",
+        "Ferrari flags being waved by fans"
       ],
-      "audio_context": "No speech detected; the audio likely contains background music that accompanies the dance performance, as the visual content shows a choreographed routine meant to be recreated by viewers"
+      "audio_context": "No speech detected; the audio likely contains ambient race-day sounds, crowd noise, and possibly celebratory music accompanying the post-race victory footage"
     },
     "captions": {
-      "formal": "Two young people perform a coordinated dance routine on a tree-lined paved road, with the man wearing a grey hoodie and light jeans and the woman wearing a navy jersey displaying the number 28. Text reading \"Recreate this whenever you are out next time\" alongside a person emoji is overlaid on the vertical footage.",
-      "sarcastic": "Two strangers on a quiet road perform choreography that will surely revolutionize how everyone walks to the mailbox from now on. The number 28 jersey suggests a level of athletic legitimacy that the synchronized bending absolutely does not undermine.",
-      "humorous_tech": "Two threads spin up a synchronized choreography routine on the paved main path, with one process invoking a callback on the other while the jersey logs build number 28. The overlay ships a fork request asking viewers to clone this repo and run it locally whenever they exit the sandbox.",
-      "humorous_non_tech": "Nothing says \"casual stroll in the neighborhood\" like stopping mid-walk to nail a choreographed dance routine you saw on your phone thirty seconds ago."
+      "formal": "A laptop screen displays post-race Formula 1 celebration footage featuring a Ferrari driver in a red racing suit being embraced by team members in the paddock, while the device's backlit keyboard illuminates the dimly lit foreground in shifting colors of yellow, green, purple, and red.",
+      "sarcastic": "A man watches someone else's triumph on a screen, his keyboard cycling through colors as if its opinion matters. The backlit keys offer a rainbow of emotional support for a celebration he had no part in.",
+      "humorous_tech": "Watching the production deploy succeed while the RGB keyboard cycles through every color like a CI pipeline celebrating a green build, as the lead developer bypasses the firewall to merge directly into main and gets swarmed by the team resolving the resulting merge conflicts in a group hug.",
+      "humorous_non_tech": "Watching a Ferrari victory party through a laptop screen while the keyboard behind it cycles through every color like it's trying to steal the celebration for itself."
     },
     "self_judge_scores": {
       "formal": {
         "accuracy": 4,
-        "tone_fit": 4
+        "tone_fit": 5
+      },
+      "sarcastic": {
+        "accuracy": 3,
+        "tone_fit": 5
+      },
+      "humorous_tech": {
+        "accuracy": 3,
+        "tone_fit": 5
+      },
+      "humorous_non_tech": {
+        "accuracy": 4,
+        "tone_fit": 5
+      }
+    }
+  },
+  {
+    "clip_id": "Clip2",
+    "scene_description": {
+      "setting": "An outdoor paved road or driveway lined with lush green trees on both sides, with a stone wall on the left and a green structure/building on the right, during daytime with natural sunlight",
+      "subjects": [
+        "A young man wearing a grey hoodie, white graphic t-shirt, and light blue jeans",
+        "A young woman wearing a dark navy oversized jersey with the number '28' and dark shorts"
+      ],
+      "actions": [
+        "The two subjects stand facing the camera on the road",
+        "They begin performing a synchronized dance or movement routine",
+        "The woman bends forward and moves dynamically",
+        "The man extends his arm toward the woman as they continue their choreographed movements",
+        "They both perform energetic dance steps together"
+      ],
+      "notable_details": [
+        "Text overlay reads 'Recreate this whenever you are out next time' with a person emoji",
+        "The video is presented in a vertical format with black bars on top and bottom",
+        "The woman's jersey prominently displays the number '28'",
+        "The scene has a casual, social media-style aesthetic typical of dance trend videos"
+      ],
+      "audio_context": "No speech is detected in the audio; the clip likely contains background music that accompanies the dance routine being performed by the two subjects"
+    },
+    "captions": {
+      "formal": "Two young people stand on a tree-lined paved road performing a synchronized dance routine, with the woman wearing a navy jersey displaying the number '28' and the man in a grey hoodie and light blue jeans. Text overlay at the top reads 'Recreate this whenever you are out next time' alongside a person emoji.",
+      "sarcastic": "Two people perform a synchronized dance on a paved road, prompting instructions for the entire internet to recreate the moment, as if casual choreography were a vanishing cultural treasure.",
+      "humorous_tech": "Two paired processes spin up on an outdoor cluster, executing a synchronized dance subroutine with zero latency between threads. The overlay acts as a public API, returning a recommendation to fork the choreography whenever the user pings the outside environment.",
+      "humorous_non_tech": "You told your family you were just stepping out for some fresh air, not stepping out for a full choreography with a backup dancer."
+    },
+    "self_judge_scores": {
+      "formal": {
+        "accuracy": 4,
+        "tone_fit": 3
       },
       "sarcastic": {
         "accuracy": 3,
