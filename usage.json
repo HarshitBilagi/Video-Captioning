@@ -1,7 +1,7 @@
 {
-  "total_calls": 18,
-  "total_prompt_tokens": 14082,
-  "total_completion_tokens": 5606,
-  "total_tokens": 19688,
+  "total_calls": 9,
+  "total_prompt_tokens": 7597,
+  "total_completion_tokens": 2812,
+  "total_tokens": 10409,
   "max_calls_limit": 100
 }

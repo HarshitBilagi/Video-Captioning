@@ -98,5 +98,55 @@
         "tone_fit": 5
       }
     }
+  },
+  {
+    "clip_id": "drive_1783509796",
+    "scene_description": {
+      "setting": "An open-sided community hall or cultural pavilion with a thatched bamboo roof, mud/clay walls, and fluorescent tube lighting. The space has a tiled floor and appears to be in a rural or semi-rural Indian setting, with a doorway visible in the background bearing a sign in a local Indian language.",
+      "subjects": [
+        "A group of women dressed in traditional white sarees with red borders and matching red patterned blouses",
+        "A few men in the background, some wearing yellow shirts, possibly organizers or instructors",
+        "A person in the foreground partially obscured by pink/red fabric"
+      ],
+      "actions": [
+        "Women are gathered in a group, appearing to prepare for or participate in a cultural performance or dance",
+        "Some women are adjusting their sarees and attire",
+        "The group seems to be organizing themselves, possibly forming a formation for a traditional dance"
+      ],
+      "notable_details": [
+        "Traditional white sarees with distinctive red borders worn by the women",
+        "Red patterned blouses with intricate designs",
+        "Thatched bamboo ceiling structure with exposed beams",
+        "A blue sign with text in a local Indian script mounted on the wall",
+        "Pink/red fabric (possibly a hat or clothing item) prominently in the foreground partially blocking the view",
+        "A red fire extinguisher visible near the doorway",
+        "Fluorescent tube lights mounted on the ceiling beams"
+      ],
+      "audio_context": "No speech was detected in the audio; only ambient sounds are present, suggesting background noise from the gathering, possibly including movement of people, fabric rustling, and environmental sounds typical of a community event or cultural gathering."
+    },
+    "captions": {
+      "formal": "A group of women wearing traditional white sarees with red borders and matching red patterned blouses gather inside an open-sided pavilion with a thatched bamboo roof, adjusting their attire as they organize into formation for a cultural performance. Pink and red fabric partially obscures the foreground view, while men in yellow shirts stand in the background of the tiled community hall.",
+      "sarcastic": "Generations of cultural heritage gather beneath fluorescent tubes and a thatched ceiling, while the fire extinguisher stands by in case the choreography gets out of hand.",
+      "humorous_tech": "A cluster of worker threads in matching uniforms is spinning up for a synchronized dance routine, blocked from view by a foreground process hogging the framebuffer. Meanwhile, background daemons in yellow shirts monitor the rollout while an emergency rollback button sits mounted near the exit.",
+      "humorous_non_tech": "Everybody is lined up perfectly for their dance, but somebody's hat has the VIP seat right in front of the camera."
+    },
+    "self_judge_scores": {
+      "formal": {
+        "accuracy": 5,
+        "tone_fit": 5
+      },
+      "sarcastic": {
+        "accuracy": 4,
+        "tone_fit": 5
+      },
+      "humorous_tech": {
+        "accuracy": 4,
+        "tone_fit": 5
+      },
+      "humorous_non_tech": {
+        "accuracy": 3,
+        "tone_fit": 5
+      }
+    }
   }
 ]

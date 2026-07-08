@@ -23,7 +23,7 @@ except ImportError:
     from self_judge import judge_all_captions
     from model_client import ModelClient
 
-def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "results.json") -> None:
+def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "results.json", target_clip: str = None) -> None:
     """
     Orchestrates the video captioning pipeline across all video clips in the clips directory.
     Saves the final output JSON and prints a complete summary at the end.
@@ -34,13 +34,21 @@ def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "result
     # Verify/create directory structures
     os.makedirs(clips_dir, exist_ok=True)
 
-    # Search for clips with supported extensions
-    extensions = ("*.mp4", "*.mov", "*.avi")
-    video_files = []
-    for ext in extensions:
-        video_files.extend(glob.glob(os.path.join(clips_dir, ext)))
-        # Also support lowercase extensions or windows glob differences
-        video_files.extend(glob.glob(os.path.join(clips_dir, ext.upper())))
+    if target_clip:
+        # Check if the target clip path is absolute or exists relative to the CWD,
+        # otherwise look inside the clips_dir
+        if os.path.isabs(target_clip) or os.path.exists(target_clip):
+            video_files = [target_clip]
+        else:
+            video_files = [os.path.join(clips_dir, target_clip)]
+    else:
+        # Search for clips with supported extensions
+        extensions = ("*.mp4", "*.mov", "*.avi")
+        video_files = []
+        for ext in extensions:
+            video_files.extend(glob.glob(os.path.join(clips_dir, ext)))
+            # Also support lowercase extensions or windows glob differences
+            video_files.extend(glob.glob(os.path.join(clips_dir, ext.upper())))
 
     # De-duplicate and sort paths
     video_files = sorted(list(set(video_files)))
@@ -55,6 +63,16 @@ def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "result
     print("==========================================\n")
 
     results = []
+    # If processing a single target clip, load existing results to merge/update
+    if target_clip and os.path.exists(output_file):
+        try:
+            with open(output_file, "r") as f:
+                results = json.load(f)
+                if not isinstance(results, list):
+                    results = []
+        except Exception:
+            results = []
+
     success_count = 0
     failure_count = 0
 
@@ -99,6 +117,9 @@ def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "result
                 "captions": captions,
                 "self_judge_scores": judge_scores
             }
+            if target_clip:
+                # Remove existing entries with this clip_id to prevent duplicates
+                results = [r for r in results if r.get("clip_id") != clip_id]
             results.append(clip_result)
             success_count += 1
 
@@ -117,6 +138,8 @@ def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "result
                 "clip_id": clip_id,
                 "error": str(e)
             }
+            if target_clip:
+                results = [r for r in results if r.get("clip_id") != clip_id]
             results.append(clip_result)
             failure_count += 1
 
@@ -174,4 +197,11 @@ def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "result
         print(f"Error saving usage summary to usage.json: {e}")
 
 if __name__ == "__main__":
-    run_batch_pipeline()
+    import argparse
+    parser = argparse.ArgumentParser(description="Run Video Captioning Pipeline")
+    parser.add_argument("--clip", type=str, default=None, help="Process only a specific clip filename")
+    parser.add_argument("--clips-dir", type=str, default="data/clips", help="Directory containing clips")
+    parser.add_argument("--output", type=str, default="results.json", help="Path to save results JSON")
+    args = parser.parse_args()
+
+    run_batch_pipeline(clips_dir=args.clips_dir, output_file=args.output, target_clip=args.clip)
