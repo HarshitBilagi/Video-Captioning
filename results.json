@@ -2,51 +2,52 @@
   {
     "clip_id": "Clip1",
     "scene_description": {
-      "setting": "A laptop screen displaying Formula 1 post-race celebration footage, filmed in a dimly lit room with a backlit keyboard visible in the foreground",
+      "setting": "A laptop screen displaying Formula 1 racing footage, filmed in a dimly lit room with a backlit RGB keyboard visible in the foreground",
       "subjects": [
-        "A Ferrari Formula 1 driver in a red racing suit and helmet (appears to be Charles Leclerc)",
+        "A Ferrari Formula 1 driver in a red racing suit and helmet",
         "Ferrari team members in red uniforms",
-        "A woman in dark clothing (possibly a reporter or team member)"
+        "A female interviewer",
+        "Another Ferrari team member in red"
       ],
       "actions": [
-        "The driver runs through the paddock area",
-        "The driver jumps over a barrier to reach celebrating team members",
-        "The driver is embraced and hugged by multiple team members in celebration",
-        "The driver walks through the paddock wearing a yellow checkered cap",
-        "The driver stands with a teammate",
-        "The driver interacts with a woman in what appears to be a post-race interview area"
+        "The Ferrari driver runs through the paddock area",
+        "The driver jumps over a barrier into a crowd of celebrating team members",
+        "Team members embrace and hug the driver in celebration",
+        "The driver walks through the paddock wearing a yellow cap",
+        "The driver hugs another team member",
+        "The driver is interviewed by a woman in front of a Pirelli backdrop"
       ],
       "notable_details": [
-        "Ferrari logo and branding prominently displayed",
-        "Pirelli sponsor logos visible in the interview area",
-        "The number 16 visible on the driver's helmet",
-        "Laptop keyboard backlighting changes colors throughout (yellow, green, purple, orange, red)",
-        "Crowd of fans and photographers visible in the background",
-        "Ferrari flags being waved by fans"
+        "Ferrari prancing horse logo visible on red barriers",
+        "Sponsor logos including HP, Shell, Lenovo, and Pirelli",
+        "Ferrari flags being waved by fans",
+        "The driver wears a yellow cap with 'Ferrari' branding after removing the helmet",
+        "Laptop keyboard backlighting changes colors across frames (yellow, green, purple, orange, red)",
+        "Crowd of fans and team members in red Ferrari attire celebrating"
       ],
-      "audio_context": "No speech detected; the audio likely contains ambient race-day sounds, crowd noise, and possibly celebratory music accompanying the post-race victory footage"
+      "audio_context": "No speech detected in the audio; the clip likely contains ambient crowd noise, celebration sounds, and possibly background music from the F1 broadcast, complementing the visual celebration of what appears to be a Ferrari race victory"
     },
     "captions": {
-      "formal": "A laptop screen displays post-race Formula 1 celebration footage featuring a Ferrari driver in a red racing suit being embraced by team members in the paddock, while the device's backlit keyboard illuminates the dimly lit foreground in shifting colors of yellow, green, purple, and red.",
-      "sarcastic": "A man watches someone else's triumph on a screen, his keyboard cycling through colors as if its opinion matters. The backlit keys offer a rainbow of emotional support for a celebration he had no part in.",
-      "humorous_tech": "Watching the production deploy succeed while the RGB keyboard cycles through every color like a CI pipeline celebrating a green build, as the lead developer bypasses the firewall to merge directly into main and gets swarmed by the team resolving the resulting merge conflicts in a group hug.",
-      "humorous_non_tech": "Watching a Ferrari victory party through a laptop screen while the keyboard behind it cycles through every color like it's trying to steal the celebration for itself."
+      "formal": "A laptop screen displays footage of a Formula 1 driver in a red Ferrari racing suit running through the paddock and jumping into a crowd of celebrating team members in red uniforms. In the foreground, the laptop's RGB keyboard backlighting cycles through various colors while the footage shows the driver embracing team members and later being interviewed by a woman in front of a sponsor backdrop.",
+      "sarcastic": "Watching a Ferrari victory celebration on a laptop with a rainbow keyboard is peak motorsport fandom, the glowing keys providing the only trophy lighting necessary.",
+      "humorous_tech": "A successful production deploy sprints through the office while the dev team swarm-merges around it in celebration, the RGB keyboard cycling through green-yellow-red status indicators as the lead engineer finally approves the pull request during the post-deploy interview.",
+      "humorous_non_tech": "Your RGB keyboard is celebrating harder than the Ferrari pit crew, and honestly it deserves a trophy for that effort."
     },
     "self_judge_scores": {
       "formal": {
         "accuracy": 4,
-        "tone_fit": 5
+        "tone_fit": 4
       },
       "sarcastic": {
         "accuracy": 3,
-        "tone_fit": 5
+        "tone_fit": 4
       },
       "humorous_tech": {
-        "accuracy": 3,
-        "tone_fit": 5
+        "accuracy": 2,
+        "tone_fit": 4
       },
       "humorous_non_tech": {
-        "accuracy": 4,
+        "accuracy": 3,
         "tone_fit": 5
       }
     }
@@ -54,48 +55,47 @@
   {
     "clip_id": "Clip2",
     "scene_description": {
-      "setting": "An outdoor paved road or driveway lined with lush green trees on both sides, with a stone wall on the left and a green structure/building on the right, during daytime with natural sunlight",
+      "setting": "Indoor setting, likely a desk or table with a wooden surface, featuring a laptop with a backlit keyboard and decorative curtains with a brown leaf/vine pattern on a beige background",
       "subjects": [
-        "A young man wearing a grey hoodie, white graphic t-shirt, and light blue jeans",
-        "A young woman wearing a dark navy oversized jersey with the number '28' and dark shorts"
+        "A person's hand holding a deck of playing cards"
       ],
       "actions": [
-        "The two subjects stand facing the camera on the road",
-        "They begin performing a synchronized dance or movement routine",
-        "The woman bends forward and moves dynamically",
-        "The man extends his arm toward the woman as they continue their choreographed movements",
-        "They both perform energetic dance steps together"
+        "Holding a deck of cards",
+        "Splitting the deck into two halves",
+        "Manipulating the cards in a shuffling or card trick motion",
+        "Rejoining the deck",
+        "Repeatedly splitting and recombining the cards"
       ],
       "notable_details": [
-        "Text overlay reads 'Recreate this whenever you are out next time' with a person emoji",
-        "The video is presented in a vertical format with black bars on top and bottom",
-        "The woman's jersey prominently displays the number '28'",
-        "The scene has a casual, social media-style aesthetic typical of dance trend videos"
+        "Playing cards have a colorful geometric pattern with triangles, circles, and squares in red, blue, yellow, green, and white",
+        "Laptop keyboard backlight changes colors across frames (orange, green, cyan, blue, purple, red)",
+        "Curtains feature a botanical leaf and vine design",
+        "The wooden table surface is visible at the bottom of the frame"
       ],
-      "audio_context": "No speech is detected in the audio; the clip likely contains background music that accompanies the dance routine being performed by the two subjects"
+      "audio_context": "No speech detected; the audio likely contains ambient or background music, which does not directly relate to the visual card manipulation actions shown in the frames"
     },
     "captions": {
-      "formal": "Two young people stand on a tree-lined paved road performing a synchronized dance routine, with the woman wearing a navy jersey displaying the number '28' and the man in a grey hoodie and light blue jeans. Text overlay at the top reads 'Recreate this whenever you are out next time' alongside a person emoji.",
-      "sarcastic": "Two people perform a synchronized dance on a paved road, prompting instructions for the entire internet to recreate the moment, as if casual choreography were a vanishing cultural treasure.",
-      "humorous_tech": "Two paired processes spin up on an outdoor cluster, executing a synchronized dance subroutine with zero latency between threads. The overlay acts as a public API, returning a recommendation to fork the choreography whenever the user pings the outside environment.",
-      "humorous_non_tech": "You told your family you were just stepping out for some fresh air, not stepping out for a full choreography with a backup dancer."
+      "formal": "A person's hand manipulates a deck of playing cards with colorful geometric patterns on a wooden surface, repeatedly splitting and rejoining the cards in front of a laptop with a color-changing backlit keyboard and botanical-patterned curtains.",
+      "sarcastic": "A hand splits and reunites a deck of cards with the gravity of a sacred rite, while the laptop keyboard cycles through colors as if it too is moved by the performance.",
+      "humorous_tech": "Someone stress-tests a recursive merge-sort by repeatedly splitting and recombining the deck while the laptop's RGB backlight cycles through branch indicator colors.",
+      "humorous_non_tech": "The laptop keyboard is cycling through every color of the rainbow like it forgot the card trick was supposed to be the main attraction."
     },
     "self_judge_scores": {
       "formal": {
+        "accuracy": 5,
+        "tone_fit": 5
+      },
+      "sarcastic": {
         "accuracy": 4,
         "tone_fit": 3
       },
-      "sarcastic": {
-        "accuracy": 3,
-        "tone_fit": 4
-      },
       "humorous_tech": {
-        "accuracy": 4,
+        "accuracy": 3,
         "tone_fit": 5
       },
       "humorous_non_tech": {
-        "accuracy": 3,
-        "tone_fit": 4
+        "accuracy": 4,
+        "tone_fit": 5
       }
     }
   }

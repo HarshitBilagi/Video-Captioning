@@ -158,5 +158,20 @@ def run_batch_pipeline(clips_dir: str = "data/clips", output_file: str = "result
     # Print API usage summary
     ModelClient.print_usage_summary()
 
+    # Save usage stats to a file for Streamlit UI ingestion
+    usage_data = {
+        "total_calls": ModelClient._total_calls,
+        "total_prompt_tokens": ModelClient._total_prompt_tokens,
+        "total_completion_tokens": ModelClient._total_completion_tokens,
+        "total_tokens": ModelClient._total_tokens,
+        "max_calls_limit": ModelClient._MAX_CALLS_PER_RUN
+    }
+    try:
+        with open("usage.json", "w") as uf:
+            json.dump(usage_data, uf, indent=2)
+        print("Usage summary saved to: usage.json")
+    except Exception as e:
+        print(f"Error saving usage summary to usage.json: {e}")
+
 if __name__ == "__main__":
     run_batch_pipeline()
