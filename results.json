@@ -148,5 +148,54 @@
         "tone_fit": 5
       }
     }
+  },
+  {
+    "clip_id": "14736501_1080_1920_60fps",
+    "scene_description": {
+      "setting": "Nighttime at a Formula 1 racing circuit, likely the Yas Marina Circuit in Abu Dhabi, featuring illuminated tent-like canopy structures over grandstands and a well-lit track",
+      "subjects": [
+        "Spectators in grandstands",
+        "Formula 1 race car on track",
+        "Track officials and staff"
+      ],
+      "actions": [
+        "Spectators seated and watching the event",
+        "A race car driving along the track",
+        "Camera panning across the circuit and grandstands"
+      ],
+      "notable_details": [
+        "Distinctive blue-lit tent canopy structures covering the grandstands",
+        "Large digital display screen visible in the background",
+        "Safety barriers lining the track",
+        "Crowded grandstands filled with diverse spectators",
+        "Track markings and pit lane area visible",
+        "Multi-level viewing areas and hospitality suites"
+      ],
+      "audio_context": "No speech detected in the audio; ambient sounds of the racing event atmosphere, likely including crowd noise and track sounds, complement the visual of an active motorsport event"
+    },
+    "captions": {
+      "formal": "A Formula 1 race car travels along a brightly lit track at night. Spectators watch from crowded grandstands covered by illuminated blue canopy structures behind track safety barriers.",
+      "sarcastic": "An entire architectural ecosystem of tents, suites, and screens has been assembled so people can watch a small object move quickly in a large circle. The packed grandstands suggest this is considered a reasonable use of an evening.",
+      "humorous_tech": "Spectators sit as idle processes waiting for the main thread to fire, while a lone race car tears down the illuminated track like a hot-path function bypassing every safety try-catch barrier. The camera pans across the circuit like a poorly tuned cron job, polling every grandstand in 4K resolution.",
+      "humorous_non_tech": "You paid a small fortune for grandstand seats and the cars are still just tiny glowing dots zooming past before you can even lift your binoculars."
+    },
+    "self_judge_scores": {
+      "formal": {
+        "accuracy": 5,
+        "tone_fit": 5
+      },
+      "sarcastic": {
+        "accuracy": 4,
+        "tone_fit": 5
+      },
+      "humorous_tech": {
+        "accuracy": 4,
+        "tone_fit": 5
+      },
+      "humorous_non_tech": {
+        "accuracy": 3,
+        "tone_fit": 5
+      }
+    }
   }
 ]
