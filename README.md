@@ -40,24 +40,22 @@ Results JSON + Streamlit Demo UI
 
 ### Option A — Docker (Recommended)
 ```bash
-# 1. Clone the repo
+# 1. Clone the repo (to get the clips directory structure and results.json file)
 git clone https://github.com/HarshitBilagi/Video-Captioning.git
 cd Video-Captioning
 
-# 2. Set up environment
-cp .env.example .env
-# Edit .env and add your FIREWORKS_API_KEY
-
-# 3. Add your video clips
+# 2. Add your video clips
 # Place .mp4/.mov/.avi files in data/clips/
 
-# 4. Build and run
-docker build -t video-captioning .
+# 3. Pull pre-built image (no build step needed)
+docker pull harshitbilagi/video-captioning:latest
+
+# 4. Run container
 docker run -p 8501:8501 \
   -e FIREWORKS_API_KEY=your_key_here \
   -v $(pwd)/data/clips:/app/data/clips \
   -v $(pwd)/results.json:/app/results.json \
-  video-captioning
+  harshitbilagi/video-captioning:latest
 
 # 5. Open in browser
 # http://localhost:8501

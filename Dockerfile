@@ -11,6 +11,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN python -c "import whisper; whisper.load_model('base')"
 
 COPY . .
 

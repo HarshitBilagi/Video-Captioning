@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.git/
+data/clips/*.mp4
+data/clips/*.mov
+data/clips/*.avi
+*.log
