@@ -2,8 +2,9 @@ FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1
 ENV STREAMLIT_SERVER_HEADLESS=true
+ENV STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+ENV STREAMLIT_SERVER_FILE_WATCHER_TYPE=none
 
-# Minimal ffmpeg only — no git needed at runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -16,11 +17,13 @@ RUN pip install --no-cache-dir \
     opencv-python-headless \
     streamlit \
     python-dotenv \
-    moviepy \
     pyyaml \
     requests \
     gdown \
-    fireworks-ai
+    fireworks-ai \
+    faster-whisper
+
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8')"
 
 COPY . .
 

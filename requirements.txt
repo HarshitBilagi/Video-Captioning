@@ -2,6 +2,7 @@ opencv-python-headless
 fireworks-ai
 streamlit
 python-dotenv
-moviepy
 pyyaml
 gdown
+requests
+faster-whisper

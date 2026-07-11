@@ -110,12 +110,13 @@ st.markdown('<div class="subtitle">Generating 4-tone captions using Minimax M3 v
 results = []
 results_exist = os.path.exists("results.json")
 if results_exist:
-    try:
-        with open("results.json", "r") as f:
+    with open("results.json") as f:
+        try:
             results = json.load(f)
-    except Exception as e:
-        st.error(f"Error reading results.json: {e}")
-        results_exist = False
+        except json.JSONDecodeError:
+            results = []
+else:
+    results = []
 
 # Load usage.json
 usage_data = {}
