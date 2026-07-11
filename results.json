@@ -199,5 +199,52 @@
         "tone_fit": 4
       }
     }
+  },
+  {
+    "clip_id": "drive_1783777699",
+    "scene_description": {
+      "setting": "Indoor setting, likely a desk or table with a wooden surface, featuring a laptop with RGB backlit keyboard and decorative curtains with a brown leaf/vine pattern in the background",
+      "subjects": [
+        "A person's hand holding and manipulating a deck of playing cards"
+      ],
+      "actions": [
+        "Holding a deck of cards",
+        "Splitting the deck into two halves",
+        "Displaying the card backs to the camera",
+        "Performing card flourishes and manipulations",
+        "Squaring up the deck"
+      ],
+      "notable_details": [
+        "Playing cards have a colorful geometric back design featuring triangles, circles, and squares in red, blue, green, yellow, and white",
+        "Laptop keyboard backlight cycles through multiple colors including orange, green, cyan, blue, purple, and red",
+        "Curtains feature an elegant brown leaf and vine pattern on a beige background",
+        "The wooden table surface is visible at the bottom of the frame"
+      ],
+      "audio_context": "No speech detected; the audio likely contains ambient or background music only, with no verbal narration accompanying the card manipulation visuals"
+    },
+    "captions": {
+      "formal": "A person's hand manipulates a deck of playing cards with colorful geometric backs above a wooden surface, performing flourishes and squaring the deck. A laptop with a cycling RGB backlit keyboard and beige curtains featuring a brown leaf and vine pattern are visible in the background.",
+      "sarcastic": "A man splits a deck of cards before a laptop whose RGB keyboard is clearly the real star of the show. The tasteful curtains in the background lend the proceedings an air of gravitas the card trick did not ask for.",
+      "humorous_tech": "A developer manually executing array.split() on a 52-element deck while the RGB backlight daemon runs an infinite loop through its full color spectrum.",
+      "humorous_non_tech": "That deck of cards is putting on a better light show than your RGB keyboard, and your keyboard is literally programmed to do that as its whole job."
+    },
+    "self_judge_scores": {
+      "formal": {
+        "accuracy": 4,
+        "tone_fit": 5
+      },
+      "sarcastic": {
+        "accuracy": 4,
+        "tone_fit": 5
+      },
+      "humorous_tech": {
+        "accuracy": 3,
+        "tone_fit": 5
+      },
+      "humorous_non_tech": {
+        "accuracy": 3,
+        "tone_fit": 4
+      }
+    }
   }
 ]

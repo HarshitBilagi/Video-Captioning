@@ -213,24 +213,18 @@ with tab_upload:
     uploaded_file = st.file_uploader("Upload a video file", type=["mp4", "mov", "avi"])
     
     if uploaded_file is not None:
-        filename = uploaded_file.name
-        dest_path = os.path.join("data", "clips", filename)
-        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-        
-        # Save uploaded file contents
-        with open(dest_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        
-        st.success(f"Successfully uploaded: `{filename}`")
-        
-        # Centered video preview
-        v_col1, v_col2, v_col3 = st.columns([1, 0.5, 1])
-        with v_col2:
-            st.video(dest_path)
+        if st.button("🚀 Submit & Run", key="submit_run_upload", use_container_width=True):
+            filename = uploaded_file.name
+            dest_path = os.path.join("data", "clips", filename)
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
             
-        if st.button("🚀 Run Pipeline on this clip", key="run_pipeline_upload", use_container_width=True):
-            with st.spinner(f"Running pipeline on {filename}..."):
+            with st.spinner("Processing..."):
                 try:
+                    # 1. save file to data/clips/
+                    with open(dest_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                    
+                    # 2. immediately trigger pipeline on that file
                     subprocess.run(
                         [sys.executable, "pipeline.py", "--clip", filename],
                         check=True,
@@ -238,15 +232,25 @@ with tab_upload:
                         text=True
                     )
                     st.session_state["last_processed_clip"] = filename
+                    st.session_state["last_processed_type"] = "upload"
                     st.success(f"Pipeline run completed for {filename}!")
                     st.toast(f"Result for {filename} updated.", icon="✅")
                 except subprocess.CalledProcessError as e:
                     st.error(f"Failed to process clip: {e}")
                     st.code(e.stderr or e.stdout)
                     
-        # Render single clip result if processed
+        # 3. reload and show results
         last_processed = st.session_state.get("last_processed_clip")
-        if last_processed == filename:
+        last_processed_type = st.session_state.get("last_processed_type")
+        if last_processed and last_processed_type == "upload" and uploaded_file and last_processed == uploaded_file.name:
+            filename = uploaded_file.name
+            dest_path = os.path.join("data", "clips", filename)
+            
+            # Centered video preview
+            v_col1, v_col2, v_col3 = st.columns([1, 0.5, 1])
+            with v_col2:
+                st.video(dest_path)
+                
             try:
                 with open("results.json", "r") as f:
                     updated_results = json.load(f)
@@ -263,136 +267,113 @@ with tab_upload:
 # TAB 3: URL / Album Link
 with tab_url:
     st.header("Download & Process from URL / Album Link")
-    url_input = st.text_input("Enter direct video URL or public Google Drive file/folder link", placeholder="https://...")
+    url_input = st.text_input("Paste video URL or Google Drive link", placeholder="https://...")
     
-    if url_input:
-        is_gdrive = "drive.google.com" in url_input
-        is_direct_video = any(ext in url_input.lower() for ext in [".mp4", ".mov", ".avi"])
-        
-        if not is_gdrive and not is_direct_video:
-            st.error("Unsupported URL type. Must be a direct link to a video file (.mp4, .mov, .avi) or a drive.google.com link.")
+    if st.button("🚀 Submit & Run", key="submit_run_url", use_container_width=True):
+        if not url_input:
+            st.warning("Please enter a URL first")
         else:
-            download_clicked = st.button("📥 Download Video", use_container_width=True)
+            is_gdrive = "drive.google.com" in url_input
+            is_direct_video = any(ext in url_input.lower() for ext in [".mp4", ".mov", ".avi"])
             
-            if download_clicked:
-                timestamp = int(time.time())
-                os.makedirs(os.path.join("data", "clips"), exist_ok=True)
-                
-                if is_direct_video:
-                    # Detect filename from URL or default to mp4 extension
-                    url_path = url_input.split("?")[0]
-                    file_ext = os.path.splitext(url_path)[1] or ".mp4"
-                    filename = f"downloaded_{timestamp}{file_ext}"
-                    dest_path = os.path.join("data", "clips", filename)
+            if not is_gdrive and not is_direct_video:
+                st.error("Unsupported URL type. Must be a direct link to a video file (.mp4, .mov, .avi) or a drive.google.com link.")
+            else:
+                with st.spinner("Downloading and processing..."):
+                    timestamp = int(time.time())
+                    os.makedirs(os.path.join("data", "clips"), exist_ok=True)
                     
-                    with st.spinner("Downloading direct video..."):
+                    filename = None
+                    download_success = False
+                    
+                    # 1. download the file
+                    if is_direct_video:
+                        url_path = url_input.split("?")[0]
+                        file_ext = os.path.splitext(url_path)[1] or ".mp4"
+                        filename = f"downloaded_{timestamp}{file_ext}"
+                        dest_path = os.path.join("data", "clips", filename)
+                        
                         try:
                             response = requests.get(url_input, stream=True)
                             response.raise_for_status()
-                            total_size = int(response.headers.get('content-length', 0))
-                            block_size = 1024 * 1024  # 1 MB
-                            
-                            progress_bar = st.progress(0.0)
-                            status_text = st.empty()
-                            
-                            written = 0
                             with open(dest_path, "wb") as f:
-                                for chunk in response.iter_content(block_size):
+                                for chunk in response.iter_content(1024 * 1024):
                                     f.write(chunk)
-                                    written += len(chunk)
-                                    if total_size > 0:
-                                        percent = min(written / total_size, 1.0)
-                                        progress_bar.progress(percent)
-                                        status_text.text(f"Downloaded {written / (1024*1024):.1f} MB / {total_size / (1024*1024):.1f} MB ({percent*100:.1f}%)")
-                                    else:
-                                        status_text.text(f"Downloaded {written / (1024*1024):.1f} MB")
-                            
-                            progress_bar.empty()
-                            status_text.empty()
+                            download_success = True
                             st.success(f"Downloaded video saved to `{filename}`")
-                            st.session_state["downloaded_file_name"] = filename
                         except Exception as e:
                             st.error(f"Download failed: {e}")
                             
-                elif is_gdrive:
-                    is_folder = "/folders/" in url_input or "/drive/folders/" in url_input
-                    
-                    if is_folder:
-                        with st.spinner("Downloading Google Drive folder..."):
+                    elif is_gdrive:
+                        is_folder = "/folders/" in url_input or "/drive/folders/" in url_input
+                        
+                        if is_folder:
                             try:
                                 output_dir = os.path.join("data", "clips")
-                                gdown.download_folder(url_input, output=output_dir, quiet=False, remaining_ok=True)
-                                st.success("Google Drive folder downloaded to `data/clips/`")
-                                st.session_state["downloaded_folder"] = True
+                                gdown.download_folder(url_input, output=output_dir, quiet=True, remaining_ok=True)
+                                # Scan output_dir to target newest video file
+                                all_files = [f for f in os.listdir(output_dir) if f.lower().endswith(('.mp4', '.mov', '.avi'))]
+                                if all_files:
+                                    full_paths = [os.path.join(output_dir, f) for f in all_files]
+                                    newest_path = max(full_paths, key=os.path.getmtime)
+                                    filename = os.path.basename(newest_path)
+                                    download_success = True
+                                    st.success(f"Google Drive folder downloaded. Selected file: `{filename}`")
+                                else:
+                                    st.error("No compatible video files found in Google Drive folder.")
                             except Exception as e:
                                 st.error(f"Google Drive folder download failed: {e}")
-                                st.info("Note: Make sure the Google Drive folder link is public and has 'Anyone with the link can view' permission.")
-                    else:
-                        filename = f"drive_{timestamp}.mp4"
-                        dest_path = os.path.join("data", "clips", filename)
-                        with st.spinner("Downloading Google Drive file..."):
+                                st.info("Note: Make sure the Google Drive folder link is public.")
+                        else:
+                            filename = f"drive_{timestamp}.mp4"
+                            dest_path = os.path.join("data", "clips", filename)
                             try:
-                                gdown.download(url_input, output=dest_path, quiet=False)
+                                gdown.download(url_input, output=dest_path, quiet=True)
+                                download_success = True
                                 st.success(f"Google Drive file saved to `{filename}`")
-                                st.session_state["downloaded_file_name"] = filename
                             except Exception as e:
                                 st.error(f"Google Drive file download failed: {e}")
-                                st.info("Note: Make sure the Google Drive link is public and has 'Anyone with the link can view' permission.")
+                                st.info("Note: Make sure the Google Drive link is public.")
 
-            # Scan clips directory to offer single-clip executions
-            if os.path.exists(os.path.join("data", "clips")):
-                all_clips = sorted(os.listdir(os.path.join("data", "clips")))
-                video_clips = [f for f in all_clips if f.lower().endswith(('.mp4', '.mov', '.avi'))]
-                
-                if video_clips:
-                    st.markdown("### 🎬 Choose Video to Process")
-                    
-                    # Set default choice index if download just finished
-                    default_idx = 0
-                    last_downloaded = st.session_state.get("downloaded_file_name")
-                    if last_downloaded in video_clips:
-                        default_idx = video_clips.index(last_downloaded)
-                        
-                    selected_clip = st.selectbox("Select video file", video_clips, index=default_idx)
-                    
-                    dest_path = os.path.join("data", "clips", selected_clip)
-                    
-                    # Centered video preview
-                    v_col1, v_col2, v_col3 = st.columns([1, 1, 1])
-                    with v_col2:
-                        st.video(dest_path)
-                        
-                    if st.button("🚀 Run Pipeline on this clip", key="run_pipeline_url", use_container_width=True):
-                        with st.spinner(f"Running pipeline on {selected_clip}..."):
-                            try:
-                                subprocess.run(
-                                    [sys.executable, "pipeline.py", "--clip", selected_clip],
-                                    check=True,
-                                    capture_output=True,
-                                    text=True
-                                )
-                                st.session_state["last_processed_clip"] = selected_clip
-                                st.success(f"Pipeline run completed for {selected_clip}!")
-                                st.toast(f"Result for {selected_clip} updated.", icon="✅")
-                            except subprocess.CalledProcessError as e:
-                                st.error(f"Failed to process clip: {e}")
-                                st.code(e.stderr or e.stdout)
-                                
-                    # Render processed single clip result
-                    last_processed = st.session_state.get("last_processed_clip")
-                    if last_processed == selected_clip:
+                    # 2. immediately trigger pipeline on that file
+                    if download_success and filename:
                         try:
-                            with open("results.json", "r") as f:
-                                updated_results = json.load(f)
-                            clip_id = os.path.splitext(selected_clip)[0]
-                            clip_data = next((c for c in updated_results if c.get("clip_id") == clip_id), None)
-                            if clip_data:
-                                st.markdown("### Processed Clip Results")
-                                render_clip_results(clip_data)
-                            else:
-                                st.warning(f"Could not find results for `{clip_id}` in results.json")
-                        except Exception as e:
-                            st.error(f"Error loading updated results: {e}")
+                            subprocess.run(
+                                [sys.executable, "pipeline.py", "--clip", filename],
+                                check=True,
+                                capture_output=True,
+                                text=True
+                            )
+                            st.session_state["last_processed_clip"] = filename
+                            st.session_state["last_processed_type"] = "url"
+                            st.success(f"Pipeline run completed for {filename}!")
+                            st.toast(f"Result for {filename} updated.", icon="✅")
+                        except subprocess.CalledProcessError as e:
+                            st.error(f"Failed to process clip: {e}")
+                            st.code(e.stderr or e.stdout)
+                            
+    # 3. reload and show results
+    last_processed = st.session_state.get("last_processed_clip")
+    last_processed_type = st.session_state.get("last_processed_type")
+    if last_processed and last_processed_type == "url":
+        dest_path = os.path.join("data", "clips", last_processed)
+        if os.path.exists(dest_path):
+            v_col1, v_col2, v_col3 = st.columns([1, 0.5, 1])
+            with v_col2:
+                st.video(dest_path)
+            
+            try:
+                with open("results.json", "r") as f:
+                    updated_results = json.load(f)
+                clip_id = os.path.splitext(last_processed)[0]
+                clip_data = next((c for c in updated_results if c.get("clip_id") == clip_id), None)
+                if clip_data:
+                    st.markdown("### Processed Clip Results")
+                    render_clip_results(clip_data)
+                else:
+                    st.warning(f"Could not find results for `{clip_id}` in results.json")
+            except Exception as e:
+                st.error(f"Error loading updated results: {e}")
 
 # FOOTER SECTION
 st.markdown("<br><br>", unsafe_allow_html=True)
