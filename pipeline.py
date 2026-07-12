@@ -102,7 +102,7 @@ def run_batch_evaluation():
                 dest_path = os.path.join(temp_dir, f"{task_id}.mp4")
                 logging.info(f"Downloading {video_url} to {dest_path}")
                 
-                response = requests.get(video_url, stream=True, timeout=120)
+                response = requests.get(video_url, stream=True, timeout=(10, 110))
                 response.raise_for_status()
                 with open(dest_path, "wb") as f:
                     for chunk in response.iter_content(chunk_size=1024 * 1024):
@@ -130,9 +130,7 @@ def run_batch_evaluation():
             # Assemble successful results dict
             task_result = {
                 "task_id": task_id,
-                "answer": {
-                    "captions": captions
-                }
+                "captions": captions
             }
             results_list.append(task_result)
             logging.info(f"SUCCESS for task_id: {task_id}")
@@ -142,7 +140,7 @@ def run_batch_evaluation():
             task_result = {
                 "task_id": task_id,
                 "error": str(e),
-                "answer": None
+                "captions": None
             }
             results_list.append(task_result)
 
@@ -171,3 +169,4 @@ def run_batch_evaluation():
 
 if __name__ == "__main__":
     run_batch_evaluation()
+    sys.exit(0)

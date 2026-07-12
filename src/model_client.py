@@ -97,6 +97,14 @@ class ModelClient:
                 self.mock_mode = True
                 print("[INFO] Running in MOCK MODE - no real API calls will be made.")
 
+    def __del__(self):
+        """Destructor to ensure requests session resources are explicitly released."""
+        try:
+            if hasattr(self, "session") and self.session is not None:
+                self.session.close()
+        except Exception:
+            pass
+
     def _check_call_limit(self, method_name: str) -> None:
         """
         Checks whether the class-level call count has exceeded MAX_CALLS_PER_RUN.
@@ -185,7 +193,7 @@ class ModelClient:
         
         for attempt in range(max_retries + 1):
             try:
-                response = self.session.post(url, json=json_data, timeout=30)
+                response = self.session.post(url, json=json_data, timeout=(10, 60))
                 if response.status_code == 200:
                     # Small delay between consecutive successful calls to avoid rate limits
                     time.sleep(0.3)

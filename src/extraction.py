@@ -78,6 +78,7 @@ def extract_frames(video_path: str, fps_sample: float = 1.0, max_frames: int = 8
 
     candidates: List[Tuple[Any, float]] = []
 
+    cap = None
     try:
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
@@ -107,9 +108,10 @@ def extract_frames(video_path: str, fps_sample: float = 1.0, max_frames: int = 8
                 candidates.append((frame, timestamp))
                 current_frame += step_frames
         else:
-            # Fallback sequential read
+            # Fallback sequential read with safety limit of 100,000 frames
             current_frame = 0
-            while True:
+            max_safety_frames = 100000
+            while current_frame < max_safety_frames:
                 ret, frame = cap.read()
                 if not ret:
                     break
@@ -118,22 +120,26 @@ def extract_frames(video_path: str, fps_sample: float = 1.0, max_frames: int = 8
                     candidates.append((frame, timestamp))
                 current_frame += 1
 
-        cap.release()
-
     except Exception as e:
         logging.error(f"Error reading video {video_path}: {e}")
         return []
+    finally:
+        if cap is not None:
+            cap.release()
 
     # Handle short clips gracefully: if we extracted nothing but there is a frame, read at least frame 0
     if not candidates:
+        cap = None
         try:
             cap = cv2.VideoCapture(video_path)
             ret, frame = cap.read()
             if ret:
                 candidates.append((frame, 0.0))
-            cap.release()
         except Exception as e:
             logging.error(f"Failed to extract fallback first frame: {e}")
+        finally:
+            if cap is not None:
+                cap.release()
 
     if not candidates:
         logging.warning(f"No frames could be extracted from {video_path}")
@@ -182,16 +188,19 @@ def extract_frames(video_path: str, fps_sample: float = 1.0, max_frames: int = 8
 
 def get_video_duration(video_path: str) -> float:
     """Reads the video duration in seconds using OpenCV."""
+    cap = None
     try:
         cap = cv2.VideoCapture(video_path)
         if cap.isOpened():
             fps = cap.get(cv2.CAP_PROP_FPS)
             total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-            cap.release()
             if fps > 0 and total_frames > 0:
                 return total_frames / fps
     except Exception as e:
         logging.error(f"Error reading video duration: {e}")
+    finally:
+        if cap is not None:
+            cap.release()
     return 0.0
 
 def extract_audio_from_video(video_path: str) -> str:
@@ -219,8 +228,8 @@ def extract_audio_from_video(video_path: str) -> str:
     ]
 
     try:
-        # Run ffmpeg silently
-        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+        # Run ffmpeg silently with a hard 120 second timeout to prevent hangs
+        subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, timeout=120)
         if os.path.exists(temp_wav) and os.path.getsize(temp_wav) > 0:
             return temp_wav
     except subprocess.CalledProcessError as e:
@@ -229,6 +238,8 @@ def extract_audio_from_video(video_path: str) -> str:
             logging.info(f"Video {video_path} does not contain any audio stream.")
         else:
             logging.error(f"ffmpeg failed to extract audio: {stderr}")
+    except subprocess.TimeoutExpired:
+        logging.error(f"ffmpeg extraction timed out after 120 seconds on {video_path}")
     except Exception as e:
         logging.error(f"Unexpected error extracting audio from video: {e}")
 
@@ -286,7 +297,7 @@ def transcribe_audio(audio_path: str, model_size: str, duration: float) -> Dict[
             logging.warning(f"Failed to load faster-whisper model '{model_size}': {e}. Falling back to 'tiny'.")
             model = WhisperModel("tiny", device=device, compute_type=compute_type)
 
-        segments, info = model.transcribe(audio_path, beam_size=5)
+        segments, info = model.transcribe(audio_path, beam_size=5, vad_filter=True)
         segments_list = list(segments)
 
         if segments_list:
