@@ -4,3 +4,5 @@ __pycache__/
 venv/
 data/clips/*.mp4
 .DS_Store
+test_input/
+test_output/

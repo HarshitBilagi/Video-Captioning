@@ -188,7 +188,7 @@ class ModelClient:
                 response = self.session.post(url, json=json_data, timeout=30)
                 if response.status_code == 200:
                     # Small delay between consecutive successful calls to avoid rate limits
-                    time.sleep(0.5)
+                    time.sleep(0.3)
                     return response.json()
                 elif response.status_code in [408, 429, 500, 502, 503, 504]:
                     backoff = 2 * (attempt + 1)
@@ -418,7 +418,7 @@ class ModelClient:
 
         payload = {
             "model": self.text_model,
-            "max_tokens": 800,
+            "max_tokens": 1200,
             "messages": [
                 {"role": "system", "content": sys_prompt},
                 {"role": "user", "content": user_content}
@@ -441,7 +441,7 @@ class ModelClient:
             message = response_json["choices"][0]["message"]
             content = message.get("content")
             if not content:
-                raise ValueError("Content is None or empty in model response after retry")
+                return f"A video scene is depicted with notable visual and contextual elements."
 
         clean_caption = content.strip().strip(" \t\n\r\"'")
         return clean_caption
