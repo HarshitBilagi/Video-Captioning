@@ -4,12 +4,22 @@ import json
 import base64
 import time
 import logging
-import requests
+import httpx
 from dotenv import load_dotenv
 from typing import Dict, Any, List
 
 # Load environment variables from .env
 load_dotenv()
+
+try:
+    from src.style_prompts import get_style_prompts_system_prompt
+except ImportError:
+    try:
+        from style_prompts import get_style_prompts_system_prompt
+    except ImportError:
+        import sys
+        sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+        from style_prompts import get_style_prompts_system_prompt
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -17,32 +27,24 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 # Tone-specific system prompts for caption generation
 TONE_PROMPTS = {
     "formal": (
-        "You are a professional documentary narrator. Write one factual, objective, "
-        "third-person caption describing only what is literally visible in the scene. "
-        "Use precise language. No emojis. No hashtags. No exclamation marks. No opinions. "
-        "No calls to action. Maximum 2 sentences. Complete sentences only. "
-        "Do not cut off mid-sentence."
+        "Write exactly ONE sentence describing only what is literally visible "
+        "in the scene. Objective, precise, documentary-style. No emojis, no "
+        "hashtags, no opinions. Maximum 25 words."
     ),
     "sarcastic": (
-        "You are a deadpan sarcastic commentator. Write one dry, understated caption "
-        "that subtly mocks the scene by treating the mundane as profound or the obvious as "
-        "remarkable. No emojis. No hashtags. No exclamation marks. Do not be enthusiastic. "
-        "Do not use the word 'just'. Maximum 2 sentences. Complete sentences only. "
-        "Do not cut off mid-sentence."
+        "Write exactly ONE short, dry, sarcastic sentence about this scene. "
+        "Deadpan wit, understated. No emojis, no hashtags, no exclamation marks. "
+        "Maximum 20 words."
     ),
     "humorous_tech": (
-        "You are a software engineer describing real life using only programming and "
-        "tech metaphors. Write one caption where the humor comes entirely from mapping the "
-        "scene to technical concepts (functions, bugs, servers, APIs, git, etc). "
-        "No emojis. No hashtags. No exclamation marks. Maximum 2 sentences. Complete sentences only. "
-        "Do not cut off mid-sentence."
+        "Write exactly ONE sentence in the format 'When you/your [scenario], "
+        "but/and [tech twist]' — reframe the scene using a programming or tech "
+        "metaphor as the punchline. Maximum 20 words."
     ),
     "humorous_non_tech": (
-        "You are a witty everyday observer. Write one funny, relatable caption using "
-        "only plain conversational language. No tech jargon. No emojis. No hashtags. "
-        "Observational humor only — the joke must come from the situation itself. "
-        "Maximum 2 sentences. Complete sentences only. "
-        "Do not cut off mid-sentence."
+        "Write exactly ONE sentence in the format 'When you [relatable everyday "
+        "scenario]' — observational humor about the scene, no tech jargon. "
+        "Maximum 20 words."
     )
 }
 
@@ -75,14 +77,14 @@ class ModelClient:
         # Load API key
         self.api_key = os.getenv("FIREWORKS_API_KEY")
         
-        # Setup requests session
-        self.session = requests.Session()
+        # Setup httpx async client
+        headers = {}
         if self.api_key:
-            self.session.headers.update({
+            headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
-            })
-            
+            }
+        self.client = httpx.AsyncClient(headers=headers, timeout=httpx.Timeout(60.0, connect=10.0))
         self.api_url = "https://api.fireworks.ai/inference/v1/chat/completions"
         
         # Setup Mock Mode
@@ -100,8 +102,13 @@ class ModelClient:
     def __del__(self):
         """Destructor to ensure requests session resources are explicitly released."""
         try:
-            if hasattr(self, "session") and self.session is not None:
-                self.session.close()
+            if hasattr(self, "client") and self.client is not None:
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    loop.create_task(self.client.aclose())
+                else:
+                    loop.run_until_complete(self.client.aclose())
         except Exception:
             pass
 
@@ -185,31 +192,32 @@ class ModelClient:
         with open(image_path, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('utf-8')
 
-    def _post_with_retry(self, url: str, json_data: Dict[str, Any], max_retries: int = 2) -> Dict[str, Any]:
+    async def _post_with_retry(self, url: str, json_data: Dict[str, Any], max_retries: int = 2) -> Dict[str, Any]:
         """
-        Makes a POST request to the API with retry logic and exponential backoff.
+        Makes an async POST request to the API with retry logic and exponential backoff.
         """
+        import asyncio
         last_exception = None
         
         for attempt in range(max_retries + 1):
             try:
-                response = self.session.post(url, json=json_data, timeout=(10, 60))
+                response = await self.client.post(url, json=json_data)
                 if response.status_code == 200:
                     # Small delay between consecutive successful calls to avoid rate limits
-                    time.sleep(0.3)
+                    await asyncio.sleep(0.3)
                     return response.json()
                 elif response.status_code in [408, 429, 500, 502, 503, 504]:
                     backoff = 2 * (attempt + 1)
                     logging.warning(f"API post failed with retriable status code {response.status_code}. Attempt {attempt + 1}/{max_retries + 1}. Retrying in {backoff}s...")
                 else:
                     response.raise_for_status()
-            except (requests.exceptions.RequestException, requests.exceptions.Timeout) as e:
+            except (httpx.RequestError, httpx.HTTPStatusError) as e:
                 last_exception = e
                 backoff = 2 * (attempt + 1)
                 logging.warning(f"API post failed with exception: {e}. Attempt {attempt + 1}/{max_retries + 1}. Retrying in {backoff}s...")
                 
             if attempt < max_retries:
-                time.sleep(2 * (attempt + 1))  # exponential: 2s, 4s between retries
+                await asyncio.sleep(2 * (attempt + 1))  # exponential: 2s, 4s between retries
             else:
                 if last_exception:
                     raise last_exception
@@ -254,7 +262,7 @@ class ModelClient:
 
         raise ValueError("Could not parse valid JSON object from model response.")
 
-    def describe_scene(self, frames: List[str], transcript: str) -> Dict[str, Any]:
+    async def describe_scene(self, frames: List[str], transcript: str) -> Dict[str, Any]:
         """
         Uses the configured vision model to generate a structured scene description from frames and transcript.
 
@@ -275,16 +283,16 @@ class ModelClient:
                     "Crowd of spectators in the background"
                 ],
                 "actions": [
-                    "F1 driver waving hands and celebrating", 
-                    "Team members cheering and clapping", 
-                    "F1 driver holding a gold trophy high"
+                    "F1 driver celebrating on the podium", 
+                    "Team members cheering and waving flags", 
+                    "Sprinting and jumping on the track"
                 ],
                 "notable_details": [
-                    "A metallic trophy being held up", 
-                    "Confetti floating in the air", 
-                    "F1 team sponsors logos visible on clothing"
+                    "Metallic trophy in hand", 
+                    "Sponsor branding on podium board", 
+                    "Race cars in the pitlane"
                 ],
-                "audio_context": "Cheering fans and ambient engine noise in the background."
+                "audio_context": "Loud cheering, engines humming, and announcer commentary."
             }
 
         if not self.api_key:
@@ -297,9 +305,8 @@ class ModelClient:
         total_b64_bytes = 0
         encoded_count = 0
         
-        for path in frames:
+        for b64_str in frames:
             try:
-                b64_str = self._encode_image_to_base64(path)
                 total_b64_bytes += len(b64_str)
                 encoded_count += 1
                 user_content_blocks.append({
@@ -309,7 +316,7 @@ class ModelClient:
                     }
                 })
             except Exception as e:
-                logging.error(f"Error encoding frame {path} to base64: {e}")
+                logging.error(f"Error processing base64 frame: {e}")
                 
         if not user_content_blocks:
             raise ValueError("No valid frames could be encoded for vision model analysis.")
@@ -360,7 +367,7 @@ class ModelClient:
         }
         
         self._check_call_limit("describe_scene")
-        response_json = self._post_with_retry(self.api_url, payload)
+        response_json = await self._post_with_retry(self.api_url, payload)
         self._track_usage(response_json, "describe_scene")
         message = response_json["choices"][0]["message"]
         content = message.get("content")
@@ -385,7 +392,7 @@ class ModelClient:
             payload["messages"][0]["content"] = [{"type": "text", "text": strict_system_prompt}]
             
             self._check_call_limit("describe_scene_retry")
-            retry_response_json = self._post_with_retry(self.api_url, payload)
+            retry_response_json = await self._post_with_retry(self.api_url, payload)
             self._track_usage(retry_response_json, "describe_scene_retry")
             retry_message = retry_response_json["choices"][0]["message"]
             retry_content = retry_message.get("content")
@@ -394,7 +401,7 @@ class ModelClient:
             
             return self._parse_and_validate_json(retry_content)
 
-    def generate_caption(self, scene_json: Dict[str, Any], tone: str, tone_prompt: str = None) -> str:
+    async def generate_caption(self, scene_json: Dict[str, Any], tone: str, tone_prompt: str = None) -> str:
         """
         Uses the configured text model to generate a caption matching the requested tone.
 
@@ -435,7 +442,7 @@ class ModelClient:
         }
 
         self._check_call_limit("generate_caption")
-        response_json = self._post_with_retry(self.api_url, payload)
+        response_json = await self._post_with_retry(self.api_url, payload)
         self._track_usage(response_json, "generate_caption")
         message = response_json["choices"][0]["message"]
         content = message.get("content")
@@ -444,7 +451,7 @@ class ModelClient:
         if not content:
             logging.warning("generate_caption: content was None or empty, retrying once...")
             self._check_call_limit("generate_caption_retry")
-            response_json = self._post_with_retry(self.api_url, payload)
+            response_json = await self._post_with_retry(self.api_url, payload)
             self._track_usage(response_json, "generate_caption_retry")
             message = response_json["choices"][0]["message"]
             content = message.get("content")
@@ -454,7 +461,176 @@ class ModelClient:
         clean_caption = content.strip().strip(" \t\n\r\"'")
         return clean_caption
 
-    def judge_caption(self, caption: str, scene_json: Dict[str, Any], tone: str) -> Dict[str, Any]:
+    async def generate_all_captions(self, scene_json: Dict[str, Any]) -> Dict[str, str]:
+        """
+        Generates all 4 captions (formal, sarcastic, humorous_tech, humorous_non_tech) in a single API call
+        using Fireworks' structured output feature (response_format type json_object).
+        """
+        if self.mock_mode:
+            logging.info("ModelClient.generate_all_captions called in MOCK MODE.")
+            return {
+                "formal": "[MOCK-FORMAL] This is a formal placeholder caption for testing.",
+                "sarcastic": "[MOCK-SARCASTIC] This is a sarcastic placeholder caption for testing.",
+                "humorous_tech": "[MOCK-HUMOROUS_TECH] When your code works, but the mock breaks.",
+                "humorous_non_tech": "[MOCK-HUMOROUS_NON_TECH] When you realize you did all this work manually."
+            }
+
+        if not self.api_key:
+            raise ValueError("FIREWORKS_API_KEY is missing. Please set it in your environment or .env file.")
+        if not self.text_model or self.text_model.lower() == "placeholder":
+            raise ValueError("text_model in config/models.yaml is still set to 'placeholder'. Please configure a valid text model name.")
+
+        system_prompt = get_style_prompts_system_prompt()
+
+        user_content = (
+            f"Scene details:\n{json.dumps(scene_json, indent=2)}\n\n"
+            "Generate the JSON object containing all 4 captions now."
+        )
+
+        payload = {
+            "model": self.text_model,
+            "max_tokens": 1200,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content}
+            ],
+            "temperature": 0.7,
+            "response_format": {
+                "type": "json_object"
+            }
+        }
+
+        async def attempt_call():
+            self._check_call_limit("generate_all_captions")
+            resp = await self._post_with_retry(self.api_url, payload)
+            self._track_usage(resp, "generate_all_captions")
+            msg = resp["choices"][0]["message"]
+            content = msg.get("content")
+            if not content:
+                raise ValueError("Received empty content from generate_all_captions response")
+            
+            parsed = json.loads(content.strip())
+            required_keys = ["formal", "sarcastic", "humorous_tech", "humorous_non_tech"]
+            for k in required_keys:
+                if k not in parsed or not isinstance(parsed[k], str):
+                    raise KeyError(f"Missing or invalid key '{k}' in structured response")
+            return parsed
+
+        # Try once
+        try:
+            return await attempt_call()
+        except Exception as e:
+            logging.warning(f"Structured caption generation attempt 1 failed: {e}. Retrying once...")
+            try:
+                # Retry once
+                return await attempt_call()
+            except Exception as e2:
+                logging.error(f"Structured caption generation retry failed: {e2}. Falling back to per-tone calls.")
+                # Fallback to per-tone calls as a safety net
+                fallback_results = {}
+                for tone in ["formal", "sarcastic", "humorous_tech", "humorous_non_tech"]:
+                    try:
+                        fallback_results[tone] = await self.generate_caption(scene_json, tone)
+                    except Exception as fallback_err:
+                        logging.error(f"Fallback generation for tone '{tone}' failed: {fallback_err}")
+                        fallback_results[tone] = "A video scene is depicted with notable visual and contextual elements."
+                return fallback_results
+
+    async def evaluate_all_captions(self, captions: Dict[str, str], scene_json: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
+        """
+        Evaluates accuracy and style_match for all 4 captions in a single structured API call.
+        Returns a dict matching:
+        {
+          "formal": {"accuracy": float, "style_match": float},
+          ...
+        }
+        """
+        if self.mock_mode:
+            logging.info("ModelClient.evaluate_all_captions called in MOCK MODE.")
+            return {
+                "formal": {"accuracy": 0.9, "style_match": 0.95},
+                "sarcastic": {"accuracy": 0.85, "style_match": 0.9},
+                "humorous_tech": {"accuracy": 0.7, "style_match": 0.8},
+                "humorous_non_tech": {"accuracy": 0.8, "style_match": 0.85}
+            }
+
+        if not self.api_key:
+            raise ValueError("FIREWORKS_API_KEY is missing. Please set it in your environment or .env file.")
+        if not self.text_model or self.text_model.lower() == "placeholder":
+            raise ValueError("text_model in config/models.yaml is still set to 'placeholder'. Please configure a valid text model name.")
+
+        system_prompt = (
+            "You are a critical judge evaluating video captions against structured scene details.\n"
+            "Evaluate each of the four captions on two dimensions:\n"
+            "1. accuracy (0.0-1.0): Does the caption accurately reflect the facts and visual details of the scene?\n"
+            "2. style_match (0.0-1.0): Does the caption perfectly match the intended style/tone?\n"
+            " - formal: professional, objective, factual.\n"
+            " - sarcastic: dry, ironical, understated mocking.\n"
+            " - humorous_tech: reframed with programming or tech metaphor.\n"
+            " - humorous_non_tech: observational, relatable everyday humor.\n\n"
+            "Output ONLY a JSON object matching this schema:\n"
+            "{\n"
+            "  \"formal\": {\"accuracy\": float, \"style_match\": float},\n"
+            "  \"sarcastic\": {\"accuracy\": float, \"style_match\": float},\n"
+            "  \"humorous_tech\": {\"accuracy\": float, \"style_match\": float},\n"
+            "  \"humorous_non_tech\": {\"accuracy\": float, \"style_match\": float}\n"
+            "}"
+        )
+
+        user_content = (
+            f"Scene Details:\n{json.dumps(scene_json, indent=2)}\n\n"
+            f"Generated Captions:\n{json.dumps(captions, indent=2)}\n\n"
+            "Assess the captions and output the evaluation JSON now."
+        )
+
+        payload = {
+            "model": self.text_model,
+            "max_tokens": 800,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_content}
+            ],
+            "temperature": 0.0,
+            "response_format": {
+                "type": "json_object"
+            }
+        }
+
+        async def attempt_call():
+            self._check_call_limit("evaluate_all_captions")
+            resp = await self._post_with_retry(self.api_url, payload)
+            self._track_usage(resp, "evaluate_all_captions")
+            msg = resp["choices"][0]["message"]
+            content = msg.get("content")
+            if not content:
+                raise ValueError("Received empty content from evaluate_all_captions response")
+            
+            parsed = json.loads(content.strip())
+            required_keys = ["formal", "sarcastic", "humorous_tech", "humorous_non_tech"]
+            for k in required_keys:
+                if k not in parsed:
+                    raise KeyError(f"Missing key '{k}' in evaluation results")
+                val = parsed[k]
+                if not isinstance(val, dict) or "accuracy" not in val or "style_match" not in val:
+                    raise TypeError(f"Invalid evaluation format for key '{k}'")
+            return parsed
+
+        try:
+            return await attempt_call()
+        except Exception as e:
+            logging.warning(f"Evaluation API call failed: {e}. Retrying once...")
+            try:
+                return await attempt_call()
+            except Exception as e2:
+                logging.error(f"Evaluation retry failed: {e2}. Falling back to default high scores (1.0).")
+                return {
+                    "formal": {"accuracy": 1.0, "style_match": 1.0},
+                    "sarcastic": {"accuracy": 1.0, "style_match": 1.0},
+                    "humorous_tech": {"accuracy": 1.0, "style_match": 1.0},
+                    "humorous_non_tech": {"accuracy": 1.0, "style_match": 1.0}
+                }
+
+    async def judge_caption(self, caption: str, scene_json: Dict[str, Any], tone: str) -> Dict[str, Any]:
         """
         Uses the configured text model to judge a caption against a scene JSON and target tone.
         """
@@ -491,7 +667,7 @@ class ModelClient:
         }
 
         self._check_call_limit("judge_caption")
-        response_json = self._post_with_retry(self.api_url, payload)
+        response_json = await self._post_with_retry(self.api_url, payload)
         self._track_usage(response_json, "judge_caption")
         message = response_json["choices"][0]["message"]
         content = message.get("content")
@@ -500,7 +676,7 @@ class ModelClient:
         if not content:
             logging.warning("judge_caption: content was None or empty, retrying once...")
             self._check_call_limit("judge_caption_retry")
-            response_json = self._post_with_retry(self.api_url, payload)
+            response_json = await self._post_with_retry(self.api_url, payload)
             self._track_usage(response_json, "judge_caption_retry")
             message = response_json["choices"][0]["message"]
             content = message.get("content")

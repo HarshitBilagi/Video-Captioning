@@ -13,17 +13,7 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir \
-    opencv-python-headless \
-    streamlit \
-    python-dotenv \
-    pyyaml \
-    requests \
-    gdown \
-    fireworks-ai \
-    faster-whisper
-
-RUN python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu', compute_type='int8')"
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 

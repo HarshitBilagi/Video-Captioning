@@ -5,4 +5,4 @@ python-dotenv
 pyyaml
 gdown
 requests
-faster-whisper
+httpx

@@ -1,23 +1,12 @@
 [
   {
-    "task_id": "v1",
-    "answer": {
-      "captions": {
-        "formal": "A time-lapse view captures vehicles moving along a wide multi-lane urban boulevard lined with yellow autumn trees and flanked by high-rise apartment complexes under warm golden hour sunlight. Korean signage, traffic signals, and directional road markings are visible as cars and buses pass through the intersections.",
-        "sarcastic": "The autumn leaves put on a spectacular show for an audience that is, almost without exception, stuck in traffic and not looking up.",
-        "humorous_tech": "The boulevard runs a cron job accelerating through golden hour while packets queue at every semaphore. The autumn trees quietly ship a deprecation notice into production.",
-        "humorous_non_tech": "Every autumn these trees dress up like they have somewhere fancy to be, and rush hour traffic still treats them like background scenery."
-      }
-    }
-  },
-  {
     "task_id": "v2",
     "answer": {
       "captions": {
-        "formal": "A small orange tabby kitten with white markings sits among dense green foliage and scattered leaves in an outdoor garden, then walks forward toward the camera with its tail raised as dappled sunlight filters through the branches above.",
-        "sarcastic": "Behold, a creature of staggering complexity ventures forth from the underbrush, tail aloft as if it invented the concept of curiosity. Nature's most elaborate achievement, an orange fluffball, approaches to demand attention it has not yet earned.",
-        "humorous_tech": "The ginger tabby is a lightweight microservice recursively traversing an unindexed foliage database, its tail raised like an antenna broadcasting a heartbeat ping to any client that polls for updates.",
-        "humorous_non_tech": "This little orange tabby struts through the garden like a tiny landlord coming to inspect his property, tail held high because everything here clearly belongs to him."
+        "formal": "A small ginger tabby kitten sits in a sunlit outdoor environment surrounded by green foliage, then cautiously steps forward across the sandy ground toward the camera.",
+        "sarcastic": "The tiny orange kitten slowly advances through the dirt and leaves, clearly demonstrating its absolute command over this entire overgrown patch of garden.",
+        "humorous_tech": "The kitten successfully completed its initial boot sequence and is now executing a cautious pathfinding routine, navigating the foliage database with minimal latency.",
+        "humorous_non_tech": "This little orange explorer is tiptoeing through the dirt like it just discovered the garden is full of secret missions it must complete."
       }
     }
   },
@@ -25,10 +14,21 @@
     "task_id": "v3",
     "answer": {
       "captions": {
-        "formal": "A young Black woman with her hair in a high bun, wearing a beige jacket over an orange top and a cross necklace, sits at a white desk typing on a keyboard while looking at a large black monitor. The modern open-plan office features circular ceiling lights, glass partitions, and green potted plants in the background.",
-        "sarcastic": "In a stunning breakthrough for modern civilization, a person stares at a screen and presses keys, surrounded by the revolutionary technology of indoor plants. The pink nail polish adds a bold splash of creativity to this otherwise ordinary act of staring at a monitor.",
-        "humorous_tech": "She's running a single-threaded deep work process with zero context switching, while the exposed cables on her desk look suspiciously like unhandled promise rejections waiting to crash the build.",
-        "humorous_non_tech": "She looks like she's about to close a major deal, but really she's just hunting for that one spreadsheet she saved somewhere last week and definitely remembers the name of."
+        "formal": "A young woman in a beige jacket sits at a white desk in a bright, modern office, typing on a silver laptop and focusing intently on the screen.",
+        "sarcastic": "In a brightly lit modern office, a woman focuses intensely on her laptop, bravely taking on the heroic task of staring at a screen for what looks like hours.",
+        "humorous_tech": "The user successfully maintains a high-focus state while executing rapid keyboard inputs on her local machine, completely ignoring the background processes of the office environment.",
+        "humorous_non_tech": "She stares at her laptop screen like the answer to life's biggest mystery is hidden in that spreadsheet, completely unbothered by the busy office around her."
+      }
+    }
+  },
+  {
+    "task_id": "v1",
+    "answer": {
+      "captions": {
+        "formal": "A time-lapse captures heavy vehicular traffic moving along a multi-lane urban thoroughfare during late afternoon golden hour, flanked by autumn trees and high-rise buildings.",
+        "sarcastic": "Look, it's another time-lapse of cars driving down a city street, because watching taillights blur is exactly what the evening needed.",
+        "humorous_tech": "The city's traffic API is experiencing peak latency, with thousands of concurrent vehicles requesting lane allocation across the multi-lane thoroughfare during golden hour.",
+        "humorous_non_tech": "The autumn trees are putting on a stunning golden show, but the cars below are clearly too busy in traffic to even glance at the leaves."
       }
     }
   },
@@ -36,10 +36,10 @@
     "task_id": "v4",
     "answer": {
       "captions": {
-        "formal": "An aerial view moves forward over a mountain ridge featuring rocky peaks and green forested slopes. Layered ranges fade into atmospheric haze, gradually revealing a small city in the far distance beneath a clear blue sky.",
-        "sarcastic": "A mountain range stands resolute against a city that apparently still believes in commuting. The forest below continues its centuries-long project of doing absolutely nothing of consequence.",
-        "humorous_tech": "Every granite peak is a deprecated endpoint in a legacy monolith, with the dense forest acting as background processes quietly consuming CPU. That distant skyline is the cloud datacenter you keep postponing the migration to.",
-        "humorous_non_tech": "Even from the top of a mountain, you can still see that city reminding you that your weekend isn't going to last forever."
+        "formal": "An aerial camera glides forward over a rugged mountain range, revealing granite peaks and forested slopes. Atmospheric haze separates the distant mountain layers, with a barely visible settlement on the horizon.",
+        "sarcastic": "The mountains casually showcase their majestic granite peaks and lush forests, while a tiny city on the horizon waves desperately for some attention.",
+        "humorous_tech": "The drone camera successfully executes a forward traversal algorithm across the mountain ridge, rendering high-resolution granite meshes and dense forest textures with atmospheric depth filtering enabled.",
+        "humorous_non_tech": "The mountains are out here showing off their rocky shoulders and green jackets, completely upstaging that little town trying to peek through the clouds."
       }
     }
   },
@@ -47,10 +47,10 @@
     "task_id": "v5",
     "answer": {
       "captions": {
-        "formal": "Ocean waves continuously roll toward a dark gray pebble beach, breaking into white foam as they reach the shore before receding back into the blue-green water. A large cliff covered in lush green vegetation rises in the background beneath a hazy sky, with eroded rock and soil layers visible along its face.",
-        "sarcastic": "The ocean performs its ancient ritual of crashing against rocks for the ten thousandth time today, and the pebbles remain unimpressed. The cliff watches from a safe distance, draped in greenery, offering no commentary on the proceedings below.",
-        "humorous_tech": "The ocean runs an infinite while loop crashing into the pebble GET request endpoint with no rate limiting, while the legacy cliff monolith silently accumulates deprecated vegetation in its seasonal photosynthesis cron job.",
-        "humorous_non_tech": "The ocean keeps throwing pebbles at the shore like it still owes it money. The cliff has watched this same pointless fight for centuries and is clearly considering a career change."
+        "formal": "Ocean waves continuously roll toward a dark grey pebble beach, creating white foamy surf in the foreground. A steep cliff covered in lush green vegetation rises in the background beneath a hazy sky.",
+        "sarcastic": "The ocean endlessly crashes against a pebble shore, because apparently that is what waves do, while the green cliff watches in silent judgment.",
+        "humorous_tech": "The ocean is running a continuous background process of wave generation, throwing output to the pebble beach buffer while the cliff server remains idle in the hazy environment.",
+        "humorous_non_tech": "The waves keep crashing onto the pebbles like they are trying to win an argument with the shore, and the green cliff just stands there watching the whole thing."
       }
     }
   },
@@ -58,21 +58,10 @@
     "task_id": "v6",
     "answer": {
       "captions": {
-        "formal": "An elevated view captures a busy urban intersection in Japan where pedestrians cross in multiple directions across several crosswalks while cars, trucks, and buses navigate through the traffic light cycles. Large commercial buildings with Japanese signage and digital billboards surround the intersection, with crowds gathering at the corners to wait for their turn to cross.",
-        "sarcastic": "Hundreds of strangers briefly share the same patch of asphalt before retreating to their separate lives, as if the pavement itself were the only thing holding civilization together. The traffic lights orchestrate this small miracle of cooperation, and no one applauds.",
-        "humorous_tech": "The intersection runs as a poorly documented API where thousands of concurrent threads block on a traffic-light semaphore, then flood all four directions simultaneously while vehicles yield like a courteous mutex. The surrounding buildings keep pushing unskippable pop-up ads that pedestrians silently accept into their session storage.",
-        "humorous_non_tech": "Thousands of people crossing in every direction at the exact same time and somehow nobody bumps into anyone. Tokyo figured out how to make pure chaos politely wait for a traffic light."
-      }
-    }
-  },
-  {
-    "task_id": "v7",
-    "answer": {
-      "captions": {
-        "formal": "A person wearing a striped apron chops zucchini into small cubes on a wooden cutting board using a large chef's knife. A black skillet containing previously chopped vegetables sits in the foreground, with fresh lettuce leaves and a bottle with a red cap visible in the background.",
-        "sarcastic": "Behold, the ancient ritual of turning a vegetable into smaller vegetables, performed with the solemn focus of a surgeon and the knife skills of someone who definitely watched a YouTube tutorial once.",
-        "humorous_tech": "A chef manually slicing zucchini into uniform cubes is essentially a human compiler optimizing a monolithic array into pre-allocated memory chunks. The knife acts as a custom memcpy function, batch-transferring the diced payload straight into the skillet buffer.",
-        "humorous_non_tech": "You start with one whole zucchini and end up with five hundred tiny cubes that somehow look like they were chopped by a very determined but slightly caffeinated person. The pile grows faster than your confidence in your knife skills."
+        "formal": "An elevated view captures a bustling urban scramble crosswalk surrounded by towering commercial buildings and digital billboards. Crowds of pedestrians converge from multiple directions while vehicles navigate the intersection.",
+        "sarcastic": "Behold, a massive crowd of pedestrians crossing a Japanese intersection simultaneously, as if they collectively agreed that waiting for the light was just too mainstream.",
+        "humorous_tech": "The intersection is executing a massive concurrent thread synchronization event, with pedestrians acting as lightweight processes crossing while vehicle mutexes temporarily yield.",
+        "humorous_non_tech": "Hundreds of people are crossing the street at the exact same time, turning a simple walk into an unintentional flash mob performance."
       }
     }
   },
@@ -80,10 +69,21 @@
     "task_id": "v8",
     "answer": {
       "captions": {
-        "formal": "A male runner wearing a gray tank top and blue shorts sprints across a red running track from left to right, passing lane numbers painted in white on the surface. The low-angle view captures empty white and light blue stadium seating and dark green trees behind a metal barrier in the background.",
-        "sarcastic": "A lone runner hurtles across the track with the urgency of someone who has somewhere marginally more important to be. The empty stadium watches in reverent silence, as though witnessing a moment of profound athletic destiny rather than a man in a tank top passing through the frame.",
-        "humorous_tech": "A lone thread runs its sprint() function across the track's memory lanes, exits scope, and returns void while the empty stadium logs zero observers to the event loop.",
-        "humorous_non_tech": "He sprints like the stadium is packed with thousands of screaming fans, but the only one timing his splits is a confused squirrel in the empty bleachers."
+        "formal": "A shirtless male athlete sprints across a red outdoor running track marked with numbered lanes, moving from left to right past empty blue and white stadium seating.",
+        "sarcastic": "A lone runner sprints across an entire empty stadium, because apparently, running alone in front of thousands of vacant seats is the ultimate motivation for a personal best.",
+        "humorous_tech": "The athlete executed a high-speed left-to-right traversal across lane 8, optimizing his physical rendering pipeline while the stadium's background processes remained completely idle.",
+        "humorous_non_tech": "A guy sprints across a massive track just to prove that running is way more fun when there is absolutely no one watching."
+      }
+    }
+  },
+  {
+    "task_id": "v7",
+    "answer": {
+      "captions": {
+        "formal": "A person wearing a striped apron stands in a kitchen setting, methodically dicing fresh zucchini into uniform cubes on a wooden cutting board using a large chef's knife.",
+        "sarcastic": "Someone is intensely chopping zucchini into perfectly tiny cubes, because manually creating a salad is clearly far more rewarding than simply buying one pre-diced.",
+        "humorous_tech": "The chef executes a rapid manual input loop, processing raw zucchini data into structured arrays while the cutting board handles the memory allocation for the diced output.",
+        "humorous_non_tech": "This person is chopping up these green vegetables with absolute precision, probably preparing a meal that will somehow look effortless despite all this careful slicing."
       }
     }
   }

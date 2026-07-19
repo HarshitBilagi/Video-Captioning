@@ -16,7 +16,7 @@ except ImportError:
         sys.path.append(os.path.dirname(os.path.abspath(__file__)))
         from model_client import ModelClient
 
-def describe_scene(frames: Any, transcript: Dict[str, Any]) -> Dict[str, Any]:
+async def describe_scene(frames: Any, transcript: Dict[str, Any]) -> Dict[str, Any]:
     """
     Orchestrates the scene description step using the ModelClient.
     
@@ -64,7 +64,7 @@ def describe_scene(frames: Any, transcript: Dict[str, Any]) -> Dict[str, Any]:
 
     # 4. Invoke ModelClient
     client = ModelClient()
-    scene_desc = client.describe_scene(frame_paths, model_transcript)
+    scene_desc = await client.describe_scene(frame_paths, model_transcript)
 
     # 5. Schema validation step
     required_keys = {

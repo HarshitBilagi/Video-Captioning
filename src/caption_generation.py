@@ -31,7 +31,7 @@ def clean_caption(caption: str) -> str:
     
     return cleaned
 
-def generate_caption(scene_json: Dict[str, Any], tone: str) -> str:
+async def generate_caption(scene_json: Dict[str, Any], tone: str) -> str:
     """
     Generates a caption for the video based on the structured scene details and a specified tone.
 
@@ -51,25 +51,30 @@ def generate_caption(scene_json: Dict[str, Any], tone: str) -> str:
         
     # 2. Call ModelClient
     client = ModelClient()
-    raw_caption = client.generate_caption(scene_json, tone)
+    raw_caption = await client.generate_caption(scene_json, tone)
     
     # 3. Apply post-processing (quote/whitespace cleanup only, no truncation)
     return clean_caption(raw_caption)
 
-def generate_all_captions(scene_json: Dict[str, Any]) -> Dict[str, str]:
+async def generate_all_captions(scene_json: Dict[str, Any]) -> Dict[str, str]:
     """
-    Generates captions for all 4 supported tones.
+    Generates captions for all 4 supported tones in a single API call using structured outputs.
 
     Args:
         scene_json (Dict[str, Any]): Structured details of the scene.
 
     Returns:
-        Dict[str, str]: Dictionary mapping each tone to its generated caption.
+        Dict[str, str]: Dictionary mapping each tone to its clean generated caption.
     """
-    captions = {}
-    for tone in VALID_TONES:
-        captions[tone] = generate_caption(scene_json, tone)
-    return captions
+    client = ModelClient()
+    raw_captions = await client.generate_all_captions(scene_json)
+    
+    # Apply post-processing (whitespace and quote cleanup)
+    cleaned_captions = {}
+    for tone, caption in raw_captions.items():
+        cleaned_captions[tone] = clean_caption(caption)
+        
+    return cleaned_captions
 
 if __name__ == "__main__":
     import sys

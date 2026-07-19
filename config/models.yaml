@@ -1,3 +1,8 @@
 vision_model: "accounts/fireworks/models/minimax-m3"
 text_model: "accounts/fireworks/models/minimax-m3"
 transcription_model: "whisper-v3"
+groq_whisper_model: "whisper-large-v3"
+MIN_VIDEO_SECONDS: 2
+MAX_VIDEO_SECONDS: 300
+FRAMES_PER_SECOND: 1.0
+FRAME_JPEG_QUALITY: 70
